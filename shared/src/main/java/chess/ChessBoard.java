@@ -22,7 +22,7 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         //throw new RuntimeException("Not implemented");
-        squares[position.getRow()][position.getColumn()] = piece;
+        squares[position.getRow() - 1][position.getColumn() - 1] = piece;
     }
 
     /**
@@ -33,7 +33,11 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        return squares[position.getRow()][position.getColumn()];
+        return squares[position.getRow() - 1][position.getColumn() - 1];
+    }
+
+    public boolean isEmpty(ChessPosition position) {
+        return squares[position.getRow() - 1][position.getColumn() - 1] == null;
     }
 
     /**
@@ -80,9 +84,6 @@ public class ChessBoard {
                         continue;
                     }
                     else if (!getPiece(new ChessPosition(i, j)).equals(other.getPiece(new ChessPosition(i, j)))) {
-                        System.out.println("AAAAA");
-                        System.out.println(getPiece(new ChessPosition(i, j)));
-                        System.out.println(other.getPiece(new ChessPosition(i, j)));
                         return false;
                     }
                 }

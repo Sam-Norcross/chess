@@ -13,8 +13,8 @@ public class ChessPosition {
     private final int col;
 
     public ChessPosition(int row, int col) {
-        this.row = row - 1; //The -1 corrects for 0-indexed arrays
-        this.col = col - 1;
+        this.row = row; //The -1 corrects for 0-indexed arrays
+        this.col = col;
     }
 
     /**
@@ -46,5 +46,10 @@ public class ChessPosition {
             ChessPosition other = (ChessPosition) obj;
             return row == other.getRow() && col == other.getColumn();
         }
+    }
+
+    @Override
+    public String toString() {
+        return "ChessPosition{" + "row=" + row + ", col=" + col + '}';
     }
 }
