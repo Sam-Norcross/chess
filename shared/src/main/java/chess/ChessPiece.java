@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -53,6 +54,14 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         throw new RuntimeException("Not implemented");
+    }
+
+    private Collection<ChessMove> pawnMove(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> moves = new ArrayList<>();
+        moves.add()
+        if (myPosition.getRow() == 2 && pieceColor == ChessGame.TeamColor.WHITE) {
+
+        }
     }
 
     @Override
