@@ -54,14 +54,16 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         if (type == PieceType.PAWN) {
-            return pawnMove(board, myPosition);
+            return pawnMoves(board, myPosition);
+        } else if (type == PieceType.ROOK) {
+            return rookMoves(board, myPosition);
         }
         else {
             throw new RuntimeException("Not implemented");
         }
     }
 
-    private Collection<ChessMove> pawnMove(ChessBoard board, ChessPosition myPosition) {
+    private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> moves = new ArrayList<>();
         //White piece
         if (pieceColor == ChessGame.TeamColor.WHITE) {
@@ -167,6 +169,71 @@ public class ChessPiece {
         }
 
         return moves;
+    }
+
+    private Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> moves = new ArrayList<>();
+        
+        int r = 1;
+        int c = 0;
+
+        for (int i = 0; i < 4; i++) {
+            if (i == 1) {
+                r = -1;
+            } else if (i == 2) {
+                r = 0;
+                c = 1;
+            } else if (i == 3) {
+                r = 0;
+                c = -1;
+            }
+            ChessPosition nextPosition = new ChessPosition(myPosition.getRow() + r, myPosition.getColumn() + c);
+
+            while (nextPosition.isValid() && board.isEmpty(nextPosition)) {
+                moves.add(new ChessMove(myPosition, nextPosition));
+                nextPosition = new ChessPosition(nextPosition.getRow() + r, nextPosition.getColumn() + c);
+                if (!nextPosition.isValid()) {
+                    break;
+                }
+            }
+
+            //Capture handling
+            if (nextPosition.isValid() && !board.isEmpty(nextPosition) && isEnemy(board.getPiece(nextPosition))) {
+                moves.add(new ChessMove(myPosition, nextPosition));
+            }
+        }
+
+        return moves;
+    }
+
+    private Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition myPosition) { //TODO--VERY unfinished
+        Collection<ChessMove> moves = new ArrayList<>();
+
+        for (int i = -1; i <= 1; i += 2) {
+            for (int r = -1; r <= 1; r += 2) {
+                ChessPosition nextPosition = new ChessPosition(myPosition.getRow() + i, myPosition.getColumn() + r);
+
+                System.out.println(nextPosition);
+
+                while (nextPosition.getRow() <= 8 && nextPosition.getColumn() <= 8 && nextPosition.getRow() >= 1 && nextPosition.getColumn() >= 1 && board.isEmpty(nextPosition)) {
+                    moves.add(new ChessMove(myPosition, nextPosition));
+                    if (nextPosition.getRow() + i > 8 || nextPosition.getRow() + i < 1 || nextPosition.getColumn() + r > 8 || nextPosition.getColumn() + r < 1) {
+                        break;
+                    } else {
+                        nextPosition = new ChessPosition(nextPosition.getRow() + i, myPosition.getColumn() + r);
+                    }
+                }
+                if (!board.isEmpty(nextPosition) && isEnemy(board.getPiece(nextPosition))) {    //Capture handling
+                    moves.add(new ChessMove(myPosition, nextPosition));
+                }
+            }
+        }
+
+        return moves;
+    }
+
+    private boolean isEnemy(ChessPiece other) {
+        return pieceColor != other.pieceColor;
     }
 
     @Override
