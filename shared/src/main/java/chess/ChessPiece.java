@@ -69,9 +69,10 @@ public class ChessPiece {
         } else if (type == PieceType.KING) {
             return kingMoves(board, myPosition);
         }
-        else {
-            throw new RuntimeException("Not implemented");
+        else if (type == PieceType.KNIGHT){
+            return knightMoves(board, myPosition);
         }
+        return null;
     }
 
     private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition) {
@@ -252,6 +253,40 @@ public class ChessPiece {
                 if (nextPosition.isValid() && (board.isEmpty(nextPosition) || isEnemy(board.getPiece(nextPosition)))) {
                     moves.add(new ChessMove(myPosition, nextPosition));
                 }
+            }
+        }
+
+        return moves;
+    }
+
+    private Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> moves = new ArrayList<>();
+
+        ChessPosition nextPosition;
+
+        int r = 2;
+        int c = 1;
+
+        for (int i = 0; i < 8; i++) {
+            if (i == 2) {
+                r = 1;
+                c = 2;
+            } else if (i == 4) {
+                r = -1;
+                c = 2;
+            } else if (i == 6) {
+                r = -2;
+                c = 1;
+            }
+            if (i % 2 == 1) {
+                r *= -1;
+                c *= -1;
+            }
+
+            nextPosition = new ChessPosition(myPosition.getRow() + r, myPosition.getColumn() + c);
+
+            if (nextPosition.isValid() && (board.isEmpty(nextPosition) || isEnemy(board.getPiece(nextPosition)))) {
+                moves.add(new ChessMove(myPosition, nextPosition));
             }
         }
 
