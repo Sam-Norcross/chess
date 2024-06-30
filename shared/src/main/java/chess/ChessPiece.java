@@ -57,6 +57,15 @@ public class ChessPiece {
             return pawnMoves(board, myPosition);
         } else if (type == PieceType.ROOK) {
             return rookMoves(board, myPosition);
+        } else if (type == PieceType.BISHOP) {
+            return bishopMoves(board, myPosition);
+        } else if (type == PieceType.QUEEN) {
+            Collection<ChessMove> moves = new ArrayList<>();
+            moves = rookMoves(board, myPosition);
+            for (ChessMove move : bishopMoves(board, myPosition)) {
+                moves.add(move);
+            }
+            return moves;
         }
         else {
             throw new RuntimeException("Not implemented");
@@ -173,7 +182,7 @@ public class ChessPiece {
 
     private Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> moves = new ArrayList<>();
-        
+
         int r = 1;
         int c = 0;
 
@@ -209,21 +218,20 @@ public class ChessPiece {
     private Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition myPosition) { //TODO--VERY unfinished
         Collection<ChessMove> moves = new ArrayList<>();
 
-        for (int i = -1; i <= 1; i += 2) {
-            for (int r = -1; r <= 1; r += 2) {
-                ChessPosition nextPosition = new ChessPosition(myPosition.getRow() + i, myPosition.getColumn() + r);
+        for (int r = -1; r <= 1; r += 2) {
+            for (int c = -1; c <= 1; c += 2) {
+                ChessPosition nextPosition = new ChessPosition(myPosition.getRow() + r, myPosition.getColumn() + c);
 
-                System.out.println(nextPosition);
-
-                while (nextPosition.getRow() <= 8 && nextPosition.getColumn() <= 8 && nextPosition.getRow() >= 1 && nextPosition.getColumn() >= 1 && board.isEmpty(nextPosition)) {
+                while (nextPosition.isValid() && board.isEmpty(nextPosition)) {
                     moves.add(new ChessMove(myPosition, nextPosition));
-                    if (nextPosition.getRow() + i > 8 || nextPosition.getRow() + i < 1 || nextPosition.getColumn() + r > 8 || nextPosition.getColumn() + r < 1) {
+                    nextPosition = new ChessPosition(nextPosition.getRow() + r, nextPosition.getColumn() + c);
+                    if (!nextPosition.isValid()) {
                         break;
-                    } else {
-                        nextPosition = new ChessPosition(nextPosition.getRow() + i, myPosition.getColumn() + r);
                     }
                 }
-                if (!board.isEmpty(nextPosition) && isEnemy(board.getPiece(nextPosition))) {    //Capture handling
+
+                //Capture handling
+                if (nextPosition.isValid() && !board.isEmpty(nextPosition) && isEnemy(board.getPiece(nextPosition))) {
                     moves.add(new ChessMove(myPosition, nextPosition));
                 }
             }
