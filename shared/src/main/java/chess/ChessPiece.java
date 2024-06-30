@@ -66,6 +66,8 @@ public class ChessPiece {
                 moves.add(move);
             }
             return moves;
+        } else if (type == PieceType.KING) {
+            return kingMoves(board, myPosition);
         }
         else {
             throw new RuntimeException("Not implemented");
@@ -232,6 +234,22 @@ public class ChessPiece {
 
                 //Capture handling
                 if (nextPosition.isValid() && !board.isEmpty(nextPosition) && isEnemy(board.getPiece(nextPosition))) {
+                    moves.add(new ChessMove(myPosition, nextPosition));
+                }
+            }
+        }
+
+        return moves;
+    }
+
+    private Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> moves = new ArrayList<>();
+
+        ChessPosition nextPosition;
+        for (int r = -1; r <= 1; r++) {
+            for (int c = -1; c <= 1; c++) {
+                nextPosition = new ChessPosition(myPosition.getRow() + r, myPosition.getColumn() + c);
+                if (nextPosition.isValid() && (board.isEmpty(nextPosition) || isEnemy(board.getPiece(nextPosition)))) {
                     moves.add(new ChessMove(myPosition, nextPosition));
                 }
             }
