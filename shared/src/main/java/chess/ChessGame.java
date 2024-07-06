@@ -98,10 +98,6 @@ public class ChessGame {
                 if (piece != null && piece.getTeamColor() != teamColor) {
                     Collection<ChessMove> moves = piece.checkMoves(board, newPosition);
                     for (ChessMove move : moves) {
-
-                        System.out.println(piece.getPieceType());
-                        System.out.println(move);
-
                         if (move.getEndPosition().equals(position)) {
                             return true;
                         }
@@ -142,18 +138,15 @@ public class ChessGame {
                 newPosition = new ChessPosition(kingPosition.getRow() + r, kingPosition.getColumn() + c);
                 if (newPosition.isValid() && !checkedPosition(teamColor, newPosition)) {
                     if (board.isEmpty(newPosition) || board.getPiece(newPosition).getTeamColor() != teamColor) {
-
-                        System.out.println(newPosition);
-                        System.out.println(board.isEmpty(newPosition));
-                        System.out.println(board.getPiece(newPosition));
-                        System.out.println(teamColor);
-
                         return false;
                     }
                 }
             }
         }
         return true;
+
+
+
     }
 
     /**
@@ -164,7 +157,23 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition kingPosition = getKingPosition(teamColor);
+        ChessPosition newPosition;
+        for (int r = -1; r <= 1; r++) {
+            for (int c = -1; c <= 1; c++) {
+                newPosition = new ChessPosition(kingPosition.getRow() + r, kingPosition.getColumn() + c);
+                if (r == 0 && c == 0) {
+                    if (checkedPosition(teamColor, newPosition)) {
+                        return false;
+                    }
+                } else if (newPosition.isValid() && !checkedPosition(teamColor, newPosition)) {
+                    if (board.isEmpty(newPosition) || board.getPiece(newPosition).getTeamColor() != teamColor) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     /**
