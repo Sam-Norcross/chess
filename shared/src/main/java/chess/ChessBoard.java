@@ -1,5 +1,7 @@
 package chess;
 
+import java.util.Arrays;
+
 /**
  * A chessboard that can hold and rearrange chess pieces.
  * <p>
@@ -72,6 +74,11 @@ public class ChessBoard {
         squares[7][4] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING);
     }
 
+    public void movePiece(ChessPosition startPosition, ChessPosition endPosition) {
+        squares[endPosition.getRow() - 1][endPosition.getColumn() - 1] = squares[startPosition.getRow() - 1][startPosition.getColumn() - 1];
+        squares[startPosition.getRow() - 1][startPosition.getColumn() - 1] = null;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (getClass() != obj.getClass()) {
@@ -92,5 +99,62 @@ public class ChessBoard {
         }
     }
 
-    
+    public ChessBoard clone() {
+        ChessBoard clone = new ChessBoard();
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                if (squares[i - 1][j - 1] != null) {
+                    clone.addPiece(new ChessPosition(i, j), squares[i - 1][j - 1]);
+                }
+            }
+        }
+        return clone;
+    }
+
+    @Override
+    public String toString() {
+        String result = "";
+        for (int r = 7; r >= 0; r--) {
+            for (int c = 0; c < 8; c++) {
+                result += "|";
+                if (squares[r][c] == null) {
+                    result += " ";
+                } else {
+                    ChessPiece.PieceType type = squares[r][c].getPieceType();
+                    ChessGame.TeamColor color = squares[r][c].getTeamColor();
+                    if (color == ChessGame.TeamColor.WHITE) {
+                        if (type == ChessPiece.PieceType.PAWN) {
+                            result += "P";
+                        } else if (type == ChessPiece.PieceType.ROOK) {
+                            result += "R";
+                        } else if (type == ChessPiece.PieceType.KNIGHT) {
+                            result += "N";
+                        } else if (type == ChessPiece.PieceType.BISHOP) {
+                            result += "B";
+                        } else if (type == ChessPiece.PieceType.KING) {
+                            result += "K";
+                        } else if (type == ChessPiece.PieceType.QUEEN) {
+                            result += "Q";
+                        }
+                    } else {
+                        if (type == ChessPiece.PieceType.PAWN) {
+                            result += "p";
+                        } else if (type == ChessPiece.PieceType.ROOK) {
+                            result += "r";
+                        } else if (type == ChessPiece.PieceType.KNIGHT) {
+                            result += "n";
+                        } else if (type == ChessPiece.PieceType.BISHOP) {
+                            result += "b";
+                        } else if (type == ChessPiece.PieceType.KING) {
+                            result += "k";
+                        } else if (type == ChessPiece.PieceType.QUEEN) {
+                            result += "q";
+                        }
+                    }
+                }
+            }
+            result += "|\n";
+        }
+        return result;
+    }
 }

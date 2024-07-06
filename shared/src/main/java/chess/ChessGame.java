@@ -131,22 +131,67 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
+//        ChessPosition kingPosition = getKingPosition(teamColor);
+//        ChessPosition newPosition;
+//        for (int r = -1; r <= 1; r++) {
+//            for (int c = -1; c <= 1; c++) {
+//                newPosition = new ChessPosition(kingPosition.getRow() + r, kingPosition.getColumn() + c);
+//                if (newPosition.isValid() && !checkedPosition(teamColor, newPosition)) {
+//                    if (board.isEmpty(newPosition) || board.getPiece(newPosition).getTeamColor() != teamColor) {
+//                        return false;
+//                    }
+//                }
+//            }
+//        }
+//        return true;
+
         ChessPosition kingPosition = getKingPosition(teamColor);
         ChessPosition newPosition;
-        for (int r = -1; r <= 1; r++) {
-            for (int c = -1; c <= 1; c++) {
-                newPosition = new ChessPosition(kingPosition.getRow() + r, kingPosition.getColumn() + c);
-                if (newPosition.isValid() && !checkedPosition(teamColor, newPosition)) {
-                    if (board.isEmpty(newPosition) || board.getPiece(newPosition).getTeamColor() != teamColor) {
-                        return false;
+
+        //Try every possible piece on the opposite team
+        for (int r = 1; r <= 8; r++) {
+            for (int c = 1; c <= 8; c++) {
+                ChessBoard clone = board.clone();
+                newPosition = new ChessPosition(r, c);
+                if (!clone.isEmpty(newPosition)) {
+                    ChessPiece piece = clone.getPiece(newPosition);
+                    if (piece.getTeamColor() == teamColor) {
+                        Collection<ChessMove> moves = piece.pieceMoves(clone, newPosition);
+
+                        //Try every possible move
+                        for (ChessMove move : moves) {
+                            ChessPosition endPosition = move.getEndPosition();
+                            clone.movePiece(newPosition, endPosition);
+
+                            System.out.println(piece.getPieceType());
+                            System.out.println(move);
+
+
+                            //Check if every place the king could move is in check
+                            ChessPosition newPosition2;
+                            for (int rOffset = -1; rOffset <= 1; rOffset++) {
+                                for (int cOffset = -1; cOffset <= 1; cOffset++) {
+                                    newPosition2 = new ChessPosition(kingPosition.getRow() + rOffset, kingPosition.getColumn() + cOffset);
+                                    if (newPosition2.isValid() && !checkedPosition(teamColor, newPosition2)) {
+                                        if (clone.isEmpty(newPosition2) || clone.getPiece(newPosition2).getTeamColor() != teamColor) {
+
+                                            System.out.println(newPosition2);
+                                            System.out.println(clone);
+
+                                            return false;
+                                        }
+                                    }
+                                }
+                            }
+
+
+                        }
                     }
                 }
             }
         }
+
         return true;
-
-
-
     }
 
     /**
