@@ -96,22 +96,7 @@ public class ChessGame {
                 newPosition = new ChessPosition(r, c);
                 ChessPiece piece = board.getPiece(newPosition);
                 if (piece != null && piece.getTeamColor() != teamColor) {
-                    Collection<ChessMove> moves = piece.pieceMoves(board, newPosition);
-
-                    //Add capture moves for pawns
-                    if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
-                        if (piece.getTeamColor() != teamColor) {
-                            if (piece.getTeamColor() == TeamColor.WHITE) {
-                                //TODO--this doesn't account for promotions, but it shouldn't be an issue
-                                moves.add(new ChessMove(newPosition, new ChessPosition(newPosition.getRow() + 1, newPosition.getColumn() + 1)));
-                                moves.add(new ChessMove(newPosition, new ChessPosition(newPosition.getRow() + 1, newPosition.getColumn() - 1)));
-                            } else {
-                                moves.add(new ChessMove(newPosition, new ChessPosition(newPosition.getRow() - 1, newPosition.getColumn() + 1)));
-                                moves.add(new ChessMove(newPosition, new ChessPosition(newPosition.getRow() - 1, newPosition.getColumn() - 1)));
-                            }
-                        }
-                    }
-
+                    Collection<ChessMove> moves = piece.checkMoves(board, newPosition);
                     for (ChessMove move : moves) {
 
                         System.out.println(piece.getPieceType());
@@ -162,7 +147,6 @@ public class ChessGame {
                         System.out.println(board.isEmpty(newPosition));
                         System.out.println(board.getPiece(newPosition));
                         System.out.println(teamColor);
-//                        System.out.println(checkedPosition(teamColor, newPosition));
 
                         return false;
                     }
