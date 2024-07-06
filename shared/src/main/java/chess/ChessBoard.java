@@ -115,6 +115,7 @@ public class ChessBoard {
     public String toString() {
         String result = "";
         for (int r = 7; r >= 0; r--) {
+            result += (r + 1) + " ";
             for (int c = 0; c < 8; c++) {
                 result += "|";
                 if (squares[r][c] == null) {
@@ -155,6 +156,7 @@ public class ChessBoard {
             }
             result += "|\n";
         }
+        result += "   1 2 3 4 5 6 7 8\n";
         return result;
     }
 }
