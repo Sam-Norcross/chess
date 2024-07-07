@@ -90,13 +90,17 @@ public class ChessGame {
     }
 
     private boolean checkedPosition(TeamColor teamColor, ChessPosition position) {
+        return checkedPosition(teamColor, position, board);
+    }
+
+    private boolean checkedPosition(TeamColor teamColor, ChessPosition position, ChessBoard chessBoard) {
         ChessPosition newPosition;
         for (int r = 1; r <= 8; r++) {
             for (int c = 1; c <= 8; c++) {
                 newPosition = new ChessPosition(r, c);
-                ChessPiece piece = board.getPiece(newPosition);
+                ChessPiece piece = chessBoard.getPiece(newPosition);
                 if (piece != null && piece.getTeamColor() != teamColor) {
-                    Collection<ChessMove> moves = piece.pieceMoves(board, newPosition);
+                    Collection<ChessMove> moves = piece.pieceMoves(chessBoard, newPosition);
                     for (ChessMove move : moves) {
                         if (move.getEndPosition().equals(position)) {
                             return true;
@@ -146,61 +150,19 @@ public class ChessGame {
 
                         //Try every possible move
                         for (ChessMove move : moves) {
+                            clone = board.clone();
                             kingPosition = getKingPosition(teamColor);
                             ChessPosition endPosition = move.getEndPosition();
                             clone.movePiece(newPosition, endPosition);
 
-
-
-
-                            //NEW
                             if (piece.getPieceType() == ChessPiece.PieceType.KING) {
                                 kingPosition = endPosition;
                             }
 
-//                            System.out.println(piece.getPieceType());
-//                            System.out.println(move);
-
-//                            if (endPosition.getRow() == 7 && endPosition.getColumn() == 6 && piece.getPieceType() == ChessPiece.PieceType.KING) {
-//                                System.out.println(clone);
-//                                System.out.println(piece);
-//                                System.out.println(kingPosition);
-//                            }
-
-
-                            //Check if the king's position is still in check
-                            if (!checkedPosition(teamColor, kingPosition)) {
-
-                                
-                                //The piece isn't moved to endPosition like it should be
-                                System.out.println(board);
-                                System.out.println(clone);
-                                System.out.println("(" + r + ", " + c + ")");
-                                System.out.println(move);
-                                System.out.println(piece);
-                                System.out.println(newPosition);
-                                System.out.println(endPosition);
-                                System.out.println(kingPosition);
-                                System.out.println(clone.getPiece(kingPosition));
-                                System.out.println(clone.getPiece(new ChessPosition(3, 5)));
-                                System.out.println(checkedPosition(teamColor, new ChessPosition(3, 5)));
-
+                            //Check if the king's position is still in check if the king moves
+                            if (!checkedPosition(teamColor, kingPosition, clone)) {
                                 return false;
                             }
-
-//                            ChessPosition newPosition2;
-//                            for (int rOffset = -1; rOffset <= 1; rOffset++) {
-//                                for (int cOffset = -1; cOffset <= 1; cOffset++) {
-//                                    newPosition2 = new ChessPosition(kingPosition.getRow() + rOffset, kingPosition.getColumn() + cOffset);
-//                                    if (newPosition2.isValid() && !checkedPosition(teamColor, newPosition2)) {
-//                                        if (clone.isEmpty(newPosition2) || clone.getPiece(newPosition2).getTeamColor() != teamColor) {
-//                                            return false;
-//                                        }
-//                                    }
-//                                }
-//                            }
-
-
                         }
                     }
                 }
