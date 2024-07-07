@@ -14,10 +14,14 @@ public class ChessGame {
     ChessBoard board;
     TeamColor turn;
 
+    ChessPosition doubleMovedPawn;
+
     public ChessGame() {
         board = new ChessBoard();
         board.resetBoard();
         turn  = TeamColor.WHITE;
+
+        doubleMovedPawn = null;
     }
 
     /**
@@ -69,6 +73,24 @@ public class ChessGame {
                 }
 
             }
+
+            //En Passant handling
+            if (doubleMovedPawn != null && piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+                int forward = 1;
+                if (piece.getTeamColor() == TeamColor.BLACK) {
+                    forward = -1;
+                }
+                if (doubleMovedPawn.getRow() == startPosition.getRow()) {
+                    int diff = doubleMovedPawn.getColumn() - startPosition.getColumn();
+                    if (diff == 1 || diff == -1) {
+                        //Seems to be adding the move correctly, but there is a NullPointerException being thrown when the test is run
+                        //TODO--how to remove the piece that is captured?
+                        valids.add(new ChessMove(startPosition, new ChessPosition(startPosition.getRow() + forward, doubleMovedPawn.getColumn())));
+                    }
+                }
+            }
+
+
             return valids;
         }
     }
@@ -84,12 +106,24 @@ public class ChessGame {
         ChessPiece piece = board.getPiece(move.getStartPosition());
         if (piece == null) {
             throw new InvalidMoveException("No piece selected.");
-        } else if (!moves.contains(move)) {
-            throw new InvalidMoveException("Invalid move.");
         } else if (getTeamTurn() != piece.getTeamColor()) {
             throw new InvalidMoveException("It is the other team's turn.");
+        } else if (!moves.contains(move)) {
+            throw new InvalidMoveException("Invalid move.");
         } else {
             board.movePiece(move.getStartPosition(), move.getEndPosition(), move.getPromotionPiece());
+
+
+            //Set/reset doubleMovedPawn (for En Passant handling)
+            if (doubleMovedPawn != null) {
+                doubleMovedPawn = null;
+            }
+            if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+                if (move.getEndPosition().getRow() - move.getStartPosition().getRow() == 2 || move.getEndPosition().getRow() - move.getStartPosition().getRow() == -2) {
+                    doubleMovedPawn = move.getEndPosition();
+                }
+            }
+
         }
 
         if (getTeamTurn() == TeamColor.WHITE) {
