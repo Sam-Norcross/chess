@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -56,8 +57,19 @@ public class ChessGame {
         if (piece == null) {
             return null;
         } else {
+            Collection<ChessMove> moves = piece.pieceMoves(board, startPosition);
+            Collection<ChessMove> valids = new ArrayList<>();
+            ChessBoard clone;
+            for (ChessMove move : moves) {
+                clone = board.clone();
+                clone.movePiece(move.getStartPosition(), move.getEndPosition());
 
-            return piece.pieceMoves(board, startPosition);
+                if (!checkedPosition(piece.getTeamColor(), getKingPosition(piece.getTeamColor(), clone), clone)) {
+                    valids.add(move);
+                }
+
+            }
+            return valids;
         }
     }
 
@@ -113,12 +125,16 @@ public class ChessGame {
     }
 
     private ChessPosition getKingPosition(TeamColor teamColor) {
+        return getKingPosition(teamColor, board);
+    }
+
+    private ChessPosition getKingPosition(TeamColor teamColor, ChessBoard chessBoard) {
         ChessPosition newPosition;
         ChessPosition kingPosition = new ChessPosition(1, 1);
         for (int r = 1; r <= 8; r++) {
             for (int c = 1; c <= 8; c++) {
                 newPosition = new ChessPosition(r, c);
-                ChessPiece piece = board.getPiece(newPosition);
+                ChessPiece piece = chessBoard.getPiece(newPosition);
                 if (piece != null && piece.getTeamColor() == teamColor && piece.getPieceType() == ChessPiece.PieceType.KING) {
                     kingPosition = new ChessPosition(r, c);;
                     break;
