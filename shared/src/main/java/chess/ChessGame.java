@@ -113,7 +113,7 @@ public class ChessGame {
     }
 
     private ChessPosition getKingPosition(TeamColor teamColor) {
-        ChessPosition newPosition = new ChessPosition(1, 1);
+        ChessPosition newPosition;
         ChessPosition kingPosition = new ChessPosition(1, 1);
         for (int r = 1; r <= 8; r++) {
             for (int c = 1; c <= 8; c++) {
@@ -135,7 +135,7 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        ChessPosition kingPosition = getKingPosition(teamColor);
+        ChessPosition kingPosition;
         ChessPosition newPosition;
 
         //Try every possible piece on the opposite team
@@ -180,23 +180,46 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        ChessPosition kingPosition = getKingPosition(teamColor);
+        if (isInCheck(teamColor)) {
+            return false;
+        }
+        int count = 0;  //Number of possible moves the team can make
+        ChessPosition kingPosition;
         ChessPosition newPosition;
-        for (int r = -1; r <= 1; r++) {
-            for (int c = -1; c <= 1; c++) {
-                newPosition = new ChessPosition(kingPosition.getRow() + r, kingPosition.getColumn() + c);
-                if (r == 0 && c == 0) {
-                    if (checkedPosition(teamColor, newPosition)) {
-                        return false;
-                    }
-                } else if (newPosition.isValid() && !checkedPosition(teamColor, newPosition)) {
-                    if (board.isEmpty(newPosition) || board.getPiece(newPosition).getTeamColor() != teamColor) {
-                        return false;
+
+        //Try every possible piece on the opposite team
+        for (int r = 1; r <= 8; r++) {
+            for (int c = 1; c <= 8; c++) {
+                ChessBoard clone = board.clone();
+                newPosition = new ChessPosition(r, c);
+                if (!clone.isEmpty(newPosition)) {
+                    ChessPiece piece = clone.getPiece(newPosition);
+                    if (piece.getTeamColor() == teamColor) {
+                        Collection<ChessMove> moves = piece.pieceMoves(clone, newPosition);
+
+                        //Try every possible move
+                        for (ChessMove move : moves) {
+                            count++;
+
+                            clone = board.clone();
+                            kingPosition = getKingPosition(teamColor);
+                            ChessPosition endPosition = move.getEndPosition();
+                            clone.movePiece(newPosition, endPosition);
+
+                            if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+                                kingPosition = endPosition;
+                            }
+
+                            //Check if the king's position is still in check if the king moves
+                            if (checkedPosition(teamColor, kingPosition, clone)) {
+                                count--;
+                            }
+                        }
                     }
                 }
             }
         }
-        return true;
+        return count == 0;
     }
 
     /**
