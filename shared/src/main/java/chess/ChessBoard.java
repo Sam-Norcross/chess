@@ -27,7 +27,7 @@ public class ChessBoard {
         squares[position.getRow() - 1][position.getColumn() - 1] = piece;
     }
 
-    private void removePiece(ChessPosition position) {
+    public void removePiece(ChessPosition position) {
         squares[position.getRow() - 1][position.getColumn() - 1] = null;
     }
 
@@ -104,6 +104,11 @@ public class ChessBoard {
                     if (getPiece(new ChessPosition(i, j)) == null && other.getPiece(new ChessPosition(i, j)) == null) { //Check for empty spaces
                         continue;
                     }
+
+                    else if (getPiece(new ChessPosition(i, j)) == null || other.getPiece(new ChessPosition(i, j)) == null) {
+                        return false;
+                    }
+
                     else if (!getPiece(new ChessPosition(i, j)).equals(other.getPiece(new ChessPosition(i, j)))) {
                         return false;
                     }

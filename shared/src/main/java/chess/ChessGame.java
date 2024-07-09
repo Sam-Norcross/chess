@@ -83,8 +83,6 @@ public class ChessGame {
                 if (doubleMovedPawn.getRow() == startPosition.getRow()) {
                     int diff = doubleMovedPawn.getColumn() - startPosition.getColumn();
                     if (diff == 1 || diff == -1) {
-                        //Seems to be adding the move correctly, but there is a NullPointerException being thrown when the test is run
-                        //TODO--how to remove the piece that is captured?
                         valids.add(new ChessMove(startPosition, new ChessPosition(startPosition.getRow() + forward, doubleMovedPawn.getColumn())));
                     }
                 }
@@ -111,11 +109,23 @@ public class ChessGame {
         } else if (!moves.contains(move)) {
             throw new InvalidMoveException("Invalid move.");
         } else {
-            board.movePiece(move.getStartPosition(), move.getEndPosition(), move.getPromotionPiece());
 
 
             //Set/reset doubleMovedPawn (for En Passant handling)
             if (doubleMovedPawn != null) {
+
+                System.out.println(board);
+                System.out.println(doubleMovedPawn);
+
+                if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+                    if (move.getStartPosition().getRow() == doubleMovedPawn.getRow()) {
+                        int diff = doubleMovedPawn.getColumn() - move.getStartPosition().getColumn();
+                        if (diff == 1 || diff == -1) {
+                            board.removePiece(doubleMovedPawn);
+                        }
+                    }
+                }
+
                 doubleMovedPawn = null;
             }
             if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
@@ -123,6 +133,10 @@ public class ChessGame {
                     doubleMovedPawn = move.getEndPosition();
                 }
             }
+
+
+            board.movePiece(move.getStartPosition(), move.getEndPosition(), move.getPromotionPiece());
+
 
         }
 
