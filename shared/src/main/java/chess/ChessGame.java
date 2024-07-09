@@ -70,31 +70,19 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece =  board.getPiece(startPosition);
-
         if (piece == null) {
             return null;
         } else {
             Collection<ChessMove> moves = piece.pieceMoves(board, startPosition);
-
-
-
-            System.out.println(piece);
-            for (ChessMove move : moves) {
-                System.out.println(moves);
-            }
-
-
             Collection<ChessMove> valids = new ArrayList<>();
             ChessBoard clone;
             for (ChessMove move : moves) {
                 clone = board.clone();
                 clone.movePiece(move.getStartPosition(), move.getEndPosition());
 
-                System.out.println(clone);
-                System.out.println(piece.getTeamColor());
-                System.out.println(getKingPosition(piece.getTeamColor(), clone));
-                System.out.println(checkedPosition(piece.getTeamColor(), getKingPosition(piece.getTeamColor(), clone), clone));
-                if (!checkedPosition(piece.getTeamColor(), getKingPosition(piece.getTeamColor(), clone), clone)) {
+                if (getKingPosition(piece.getTeamColor(), clone) == null) {
+                    valids.add(move);
+                } else if (!checkedPosition(piece.getTeamColor(), getKingPosition(piece.getTeamColor(), clone), clone)) {
                     valids.add(move);
                 }
 
@@ -276,12 +264,7 @@ public class ChessGame {
 
     private ChessPosition getKingPosition(TeamColor teamColor, ChessBoard chessBoard) {
         ChessPosition newPosition;
-        ChessPosition kingPosition;
-        if (teamColor == TeamColor.WHITE) {
-            kingPosition = new ChessPosition(1, 5);
-        } else {
-            kingPosition = new ChessPosition(8, 5);
-        }
+        ChessPosition kingPosition = null;
         for (int r = 1; r <= 8; r++) {
             for (int c = 1; c <= 8; c++) {
                 newPosition = new ChessPosition(r, c);
@@ -322,13 +305,15 @@ public class ChessGame {
                             ChessPosition endPosition = move.getEndPosition();
                             clone.movePiece(newPosition, endPosition);
 
-                            if (piece.getPieceType() == ChessPiece.PieceType.KING) {
-                                kingPosition = endPosition;
-                            }
+                            if (kingPosition != null) {
+                                if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+                                    kingPosition = endPosition;
+                                }
 
-                            //Check if the king's position is still in check if the king moves
-                            if (!checkedPosition(teamColor, kingPosition, clone)) {
-                                return false;
+                                //Check if the king's position is still in check if the king moves
+                                if (!checkedPosition(teamColor, kingPosition, clone)) {
+                                    return false;
+                                }
                             }
                         }
                     }
@@ -373,13 +358,15 @@ public class ChessGame {
                             ChessPosition endPosition = move.getEndPosition();
                             clone.movePiece(newPosition, endPosition);
 
-                            if (piece.getPieceType() == ChessPiece.PieceType.KING) {
-                                kingPosition = endPosition;
-                            }
+                            if (kingPosition != null) {
+                                if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+                                    kingPosition = endPosition;
+                                }
 
-                            //Check if the king's position is still in check if the king moves
-                            if (checkedPosition(teamColor, kingPosition, clone)) {
-                                count--;
+                                //Check if the king's position is still in check if the king moves
+                                if (checkedPosition(teamColor, kingPosition, clone)) {
+                                    count--;
+                                }
                             }
                         }
                     }
