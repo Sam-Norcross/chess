@@ -16,12 +16,25 @@ public class ChessGame {
 
     ChessPosition doubleMovedPawn;
 
+    boolean wKingMoved;
+    boolean wrRookMoved;
+    boolean wlRookMoved;
+    boolean bKingMoved;
+    boolean brRookMoved;
+    boolean blRookMoved;
+
     public ChessGame() {
         board = new ChessBoard();
         board.resetBoard();
         turn  = TeamColor.WHITE;
 
         doubleMovedPawn = null;
+        wKingMoved = false;
+        wrRookMoved = false;
+        wlRookMoved = false;
+        bKingMoved = false;
+        brRookMoved = false;
+        blRookMoved = false;
     }
 
     /**
@@ -88,6 +101,30 @@ public class ChessGame {
                 }
             }
 
+            //Castling handling
+            if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+                if (piece.getTeamColor() == TeamColor.WHITE) {
+                    if (!wKingMoved) {
+                        if (!wlRookMoved && board.isEmpty(new ChessPosition(1, 2)) && board.isEmpty(new ChessPosition(1, 2)) && board.isEmpty(new ChessPosition(1, 4))) {
+                            valids.add(new ChessMove(startPosition, new ChessPosition(1, 3)));
+                        }
+                        if (!wrRookMoved && board.isEmpty(new ChessPosition(1, 7)) && board.isEmpty(new ChessPosition(1, 6))) {
+                            valids.add(new ChessMove(startPosition, new ChessPosition(1, 7)));
+                        }
+                    }
+                }
+                if (piece.getTeamColor() == TeamColor.BLACK) {
+                    if (!bKingMoved) {
+                        if (!blRookMoved && board.isEmpty(new ChessPosition(8, 2)) && board.isEmpty(new ChessPosition(8, 2)) && board.isEmpty(new ChessPosition(8, 4))) {
+                            valids.add(new ChessMove(startPosition, new ChessPosition(8, 3)));
+                        }
+                        if (!brRookMoved && board.isEmpty(new ChessPosition(8, 7)) && board.isEmpty(new ChessPosition(8, 6))) {
+                            valids.add(new ChessMove(startPosition, new ChessPosition(8, 7)));
+                        }
+                    }
+                }
+            }
+
 
             return valids;
         }
@@ -111,12 +148,8 @@ public class ChessGame {
         } else {
 
 
-            //Set/reset doubleMovedPawn (for En Passant handling)
+            //En Passant handling
             if (doubleMovedPawn != null) {
-
-                System.out.println(board);
-                System.out.println(doubleMovedPawn);
-
                 if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
                     if (move.getStartPosition().getRow() == doubleMovedPawn.getRow()) {
                         int diff = doubleMovedPawn.getColumn() - move.getStartPosition().getColumn();
@@ -125,7 +158,7 @@ public class ChessGame {
                         }
                     }
                 }
-
+                //Reset doubleMovedPawn for the next turn
                 doubleMovedPawn = null;
             }
             if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
@@ -138,6 +171,34 @@ public class ChessGame {
             board.movePiece(move.getStartPosition(), move.getEndPosition(), move.getPromotionPiece());
 
 
+            //Castling handling (moving the rook)--TODO--resetBoard doesn't reset castling flags
+            if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+                int diff = move.getEndPosition().getColumn() - move.getStartPosition().getColumn();
+                if (diff == -2) {
+                    board.movePiece(new ChessPosition(1, 1), new ChessPosition(1, 4));
+                    wlRookMoved = true;
+                }
+                if (diff == 2) {
+                    board.movePiece(new ChessPosition(1, 8), new ChessPosition(1, 6));
+                    wrRookMoved = true;
+                }
+            }
+
+            //Set castling flags
+            ChessPosition startPosition = move.getStartPosition();
+            if (!wKingMoved && startPosition.equals(new ChessPosition(1, 5))) {
+                wKingMoved = true;
+            } else if (!wlRookMoved && startPosition.equals(new ChessPosition(1, 1))) {
+                wlRookMoved = true;
+            } else if (!wrRookMoved && startPosition.equals(new ChessPosition(1, 8))) {
+                wrRookMoved = true;
+            } else if (!bKingMoved && startPosition.equals(new ChessPosition(8, 5))) {
+                bKingMoved = true;
+            } else if (!blRookMoved &&startPosition.equals(new ChessPosition(8, 1))) {
+                blRookMoved = true;
+            } else if (!brRookMoved && startPosition.equals(new ChessPosition(8, 8))) {
+                brRookMoved = true;
+            }
         }
 
         if (getTeamTurn() == TeamColor.WHITE) {
