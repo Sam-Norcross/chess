@@ -1,5 +1,6 @@
 package server;
 
+import model.AuthData;
 import model.UserData;
 import service.UserService;
 import spark.*;
@@ -7,6 +8,12 @@ import com.google.gson.Gson;
 
 
 public class Server {
+
+    private final UserService userService;
+
+    public Server(UserService userService) {
+        this.userService = userService;
+    }
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -28,11 +35,19 @@ public class Server {
         Spark.awaitStop();
     }
 
+
+
+
+    //Handler methods
+
     private String register(Request req, Response res) throws Exception {
         UserData data = new Gson().fromJson(req.body(), UserData.class);
-        UserService.register(data);
+        AuthData auth = userService.register(data);
 
-        return "RETURNED"; //TODO--JSON string here
+        String authJson = new Gson().toJson(auth);
+        System.out.println(authJson);
+
+        return authJson; //TODO--JSON string here
     }
 
 }

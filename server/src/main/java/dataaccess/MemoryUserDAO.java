@@ -9,6 +9,9 @@ public class MemoryUserDAO implements UserDAO {
 
     HashMap<String, UserData> users;
 
+    public MemoryUserDAO() {
+        users = new HashMap<>();
+    }
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
@@ -22,7 +25,7 @@ public class MemoryUserDAO implements UserDAO {
 
     @Override
     public AuthData createAuth(AuthData auth) throws DataAccessException {
-
+        return null;
     }
 
 }
