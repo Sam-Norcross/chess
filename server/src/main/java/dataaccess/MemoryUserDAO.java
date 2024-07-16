@@ -8,9 +8,11 @@ import java.util.HashMap;
 public class MemoryUserDAO implements UserDAO {
 
     HashMap<String, UserData> users;
+    HashMap<String, AuthData> authData;
 
     public MemoryUserDAO() {
         users = new HashMap<>();
+        authData = new HashMap<>();
     }
 
     @Override
@@ -20,12 +22,12 @@ public class MemoryUserDAO implements UserDAO {
 
     @Override
     public void createUser(UserData user) throws DataAccessException {
-
+        users.put(user.username(), user);
     }
 
     @Override
-    public AuthData createAuth(AuthData auth) throws DataAccessException {
-        return null;
+    public void createAuth(AuthData auth) throws DataAccessException {
+        authData.put(auth.username(), auth);
     }
 
 }

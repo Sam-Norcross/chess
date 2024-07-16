@@ -1,5 +1,7 @@
 package server;
 
+import dataaccess.DataAccessException;
+import dataaccess.MemoryUserDAO;
 import model.AuthData;
 import model.UserData;
 import service.UserService;
@@ -11,8 +13,8 @@ public class Server {
 
     private final UserService userService;
 
-    public Server(UserService userService) {
-        this.userService = userService;
+    public Server() {
+        this.userService = new UserService(new MemoryUserDAO());
     }
 
     public int run(int desiredPort) {
@@ -41,13 +43,23 @@ public class Server {
     //Handler methods
 
     private String register(Request req, Response res) throws Exception {
-        UserData data = new Gson().fromJson(req.body(), UserData.class);
-        AuthData auth = userService.register(data);
+        String authJson;
+        Gson serializer = new Gson();
+        try {
+            UserData data = serializer.fromJson(req.body(), UserData.class);
+            AuthData auth = userService.register(data);
+            authJson = serializer.toJson(auth);
+            System.out.println(authJson);
+        } catch (DataAccessException ex) {
+            res.status(403);
+            authJson = serializer.toJson(ex); //"{ \"message\": \"Error: already taken\" }";
+            System.out.println("CCC");
+            System.out.println(authJson);
+        }
 
-        String authJson = new Gson().toJson(auth);
-        System.out.println(authJson);
 
-        return authJson; //TODO--JSON string here
+
+        return authJson;
     }
 
 }

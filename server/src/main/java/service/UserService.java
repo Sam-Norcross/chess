@@ -17,16 +17,13 @@ public class UserService {
 
     public AuthData register(UserData user) throws DataAccessException {
         String username = user.username();
-        AuthData auth = new AuthData(null, null);
-
+        AuthData auth;
         if (userDAO.getUser(username) != null) {
-            //Exception?
+            throw new DataAccessException("Error: already taken");
         } else {
             userDAO.createUser(user);
-
             String authToken = UUID.randomUUID().toString();
             auth = new AuthData(user.username(), authToken);
-
             userDAO.createAuth(auth);
         }
 

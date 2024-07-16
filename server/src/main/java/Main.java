@@ -9,8 +9,7 @@ public class Main {
         System.out.println("♕ 240 Chess Server: " + piece);
 
 
-        UserService userService = new UserService(new MemoryUserDAO());
-        Server server = new Server(userService);
+        Server server = new Server();
         server.run(8080);
         System.out.println("Server started!");
 

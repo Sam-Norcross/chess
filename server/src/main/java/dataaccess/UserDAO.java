@@ -10,6 +10,6 @@ public interface UserDAO {
 
     public void createUser(UserData user) throws DataAccessException;
 
-    public AuthData createAuth(AuthData auth) throws DataAccessException;
+    public void createAuth(AuthData auth) throws DataAccessException;
 
 }
