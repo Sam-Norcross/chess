@@ -24,6 +24,8 @@ public class Server {
 
         // Register your endpoints and handle exceptions here.
         Spark.post("/user", this::register);    //Body: { "username":"", "password":"", "email":"" }
+        Spark.post("/session", this::login);
+        Spark.delete("/session", this::logout);
 
         //This line initializes the server and can be removed once you have a functioning endpoint 
 //        Spark.init();
@@ -52,12 +54,45 @@ public class Server {
             System.out.println(authJson);
         } catch (DataAccessException ex) {
             res.status(403);
-            authJson = serializer.toJson(ex); //"{ \"message\": \"Error: already taken\" }";
+
+            //TODO--serialize exception to JSON for return?
+            authJson = serializer.toJson(ex.getMessage()); //"{ \"message\": \"Error: already taken\" }";
             System.out.println("CCC");
             System.out.println(authJson);
         }
 
 
+        return authJson;
+    }
+
+    private String login(Request req, Response res) throws Exception {
+        String authJson;
+        Gson serializer = new Gson();
+
+        try {
+            UserData data = serializer.fromJson(req.body(), UserData.class);
+            AuthData auth = userService.login(data);
+            authJson = serializer.toJson(auth);
+        } catch (DataAccessException ex) {
+            //Handler errors
+            authJson = "TEST (ERROR)";
+        }
+
+        return authJson;
+    }
+
+    private String logout(Request req, Response res) throws Exception {
+        String authJson;
+        Gson serializer = new Gson();
+
+        System.out.println(req.body());
+
+        try {
+
+            authJson = "{}";
+        } catch (Exception ex) {
+            authJson = "TEST (ERROR)";
+        }
 
         return authJson;
     }
