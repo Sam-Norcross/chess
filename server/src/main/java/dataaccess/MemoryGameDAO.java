@@ -10,7 +10,7 @@ public class MemoryGameDAO implements GameDAO {
     private HashMap<Integer, GameData> games; //GameID, GameData?
 
     public MemoryGameDAO() {
-        this.games = new HashMap<>();
+        games = new HashMap<>();
     }
 
     public GameData createGame(GameData gameData) {
@@ -18,6 +18,8 @@ public class MemoryGameDAO implements GameDAO {
         return gameData;
     }
 
-
+    public void clearGames() {
+        games = new HashMap<>();
+    }
 
 }

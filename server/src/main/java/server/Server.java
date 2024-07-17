@@ -1,9 +1,10 @@
 package server;
 
-import dataaccess.DataAccessException;
-import dataaccess.MemoryUserDAO;
+import dataaccess.*;
 import model.AuthData;
 import model.UserData;
+import service.ClearService;
+import service.GameService;
 import service.UserService;
 import spark.*;
 import com.google.gson.Gson;
@@ -12,9 +13,17 @@ import com.google.gson.Gson;
 public class Server {
 
     private final UserService userService;
+    private final GameService gameService;
+    private final ClearService clearService;
 
     public Server() {
-        this.userService = new UserService(new MemoryUserDAO());
+        UserDAO userDAO = new MemoryUserDAO();
+        GameDAO gameDAO = new MemoryGameDAO();
+
+        this.userService = new UserService(userDAO);
+        this.gameService = new GameService(gameDAO);
+        this.clearService = new ClearService(userDAO, gameDAO);
+
     }
 
     public int run(int desiredPort) {
@@ -103,9 +112,9 @@ public class Server {
 
 
     private String clear(Request req, Response res) throws Exception {
-        String authJson = "";
+        String authJson = "{}";
         Gson serializer = new Gson();
-
+        clearService.clear();
         return authJson;
     }
 

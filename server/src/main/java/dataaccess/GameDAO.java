@@ -7,6 +7,6 @@ public interface GameDAO {
 
     public GameData createGame(GameData gameData);
 
-
+    public void clearGames();
 
 }

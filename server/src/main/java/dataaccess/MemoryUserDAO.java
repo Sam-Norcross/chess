@@ -30,4 +30,12 @@ public class MemoryUserDAO implements UserDAO {
         authData.put(auth.username(), auth);
     }
 
+    public void clearUsers() {
+        users = new HashMap<>();
+    }
+
+    public void clearAuth() {
+        authData = new HashMap<>();
+    }
+
 }

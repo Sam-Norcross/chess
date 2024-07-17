@@ -12,4 +12,8 @@ public interface UserDAO {
 
     public void createAuth(AuthData auth) throws DataAccessException;
 
+    public void clearUsers();
+
+    public void clearAuth();
+
 }
