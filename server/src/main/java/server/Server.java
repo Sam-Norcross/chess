@@ -27,6 +27,8 @@ public class Server {
         Spark.post("/session", this::login);
         Spark.delete("/session", this::logout);
 
+        Spark.delete("/db", this::clear);
+
         //This line initializes the server and can be removed once you have a functioning endpoint 
 //        Spark.init();
 
@@ -93,6 +95,16 @@ public class Server {
         } catch (Exception ex) {
             authJson = "TEST (ERROR)";
         }
+
+        return authJson;
+    }
+
+
+
+
+    private String clear(Request req, Response res) throws Exception {
+        String authJson = "";
+        Gson serializer = new Gson();
 
         return authJson;
     }

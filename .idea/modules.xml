@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/chess.iml" filepath="$PROJECT_DIR$/.idea/chess.iml" />
+      <module fileurl="file://$PROJECT_DIR$/client/client.iml" filepath="$PROJECT_DIR$/client/client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/server/src/main/server.iml" filepath="$PROJECT_DIR$/server/src/main/server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/shared/src/test/shared.iml" filepath="$PROJECT_DIR$/shared/src/test/shared.iml" />
     </modules>
   </component>
 </project>
