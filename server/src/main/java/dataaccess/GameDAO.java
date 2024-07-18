@@ -3,12 +3,16 @@ package dataaccess;
 import chess.ChessGame;
 import model.GameData;
 
+import java.util.HashMap;
+
 public interface GameDAO {
 
-    public GameData createGame(String gameName);
+    GameData createGame(String gameName);
 
-    public int newGameID();
+    int newGameID();
 
-    public void clearGames();
+    void clearGames();
+
+    HashMap<Integer, GameData> getGames();
 
 }

@@ -2,10 +2,12 @@ package service;
 
 import dataaccess.*;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,8 +42,28 @@ public class GameServiceTest {
 
     @Test
     public void createGameBadAuth() throws DataAccessException {
-        String authToken = registerAndLogin();
+        registerAndLogin();
         assertThrows(DataAccessException.class, () -> gameService.createGame(UUID.randomUUID().toString(), "Bob's game"));
+    }
+
+    @Test
+    public void listMultipleGames() throws DataAccessException {
+        String authToken = registerAndLogin();
+        for (int i = 0; i < 5; i++) {
+            gameService.createGame(authToken, UUID.randomUUID().toString());
+        }
+        assertDoesNotThrow(() -> gameService.listGames(authToken));
+        assertEquals(5, gameService.listGames(authToken).size());
+    }
+
+    @Test
+    public void listMultipleGamesBadAuth() throws DataAccessException {
+        String authToken = registerAndLogin();
+        String badAuthToken = UUID.randomUUID().toString();
+        for (int i = 0; i < 5; i++) {
+            gameService.createGame(authToken, UUID.randomUUID().toString());
+        }
+        assertThrows(DataAccessException.class, () -> gameService.listGames(badAuthToken));
     }
 
 }

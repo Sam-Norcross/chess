@@ -4,6 +4,9 @@ import chess.ChessGame;
 import dataaccess.*;
 import model.*;
 
+import java.util.Collection;
+import java.util.HashMap;
+
 public class GameService {
 
     private final UserDAO userDAO;
@@ -14,26 +17,26 @@ public class GameService {
         this.userDAO = userDAO;
     }
 
+    public HashMap<Integer, GameData> listGames(String authToken) throws DataAccessException {
+        verifyAuth(authToken);
+        return gameDAO.getGames();
+    }
+
     public GameData createGame(String authToken, String gameName) throws DataAccessException {
-        AuthData auth = userDAO.getAuth(authToken);
-        GameData gameData;
-
-        if (auth == null) {
-            throw new DataAccessException("Error: unauthorized");
-        }
-        else {
-            gameData = gameDAO.createGame(gameName);
-        }
-
-        return gameData;
+        verifyAuth(authToken);
+        return gameDAO.createGame(gameName);
     }
 
 //    public GameData joinGame() {
 //
 //    }
-//
-//    public Collection<GameData> listGames() {
-//
-//    }
+
+    private void verifyAuth(String authToken) throws DataAccessException {
+        AuthData auth = userDAO.getAuth(authToken);
+
+        if (auth == null) {
+            throw new DataAccessException("Error: unauthorized");
+        }
+    }
 
 }

@@ -27,4 +27,8 @@ public class MemoryGameDAO implements GameDAO {
         games = new HashMap<>();
     }
 
+    public HashMap<Integer, GameData> getGames() {
+        return games;
+    }
+
 }

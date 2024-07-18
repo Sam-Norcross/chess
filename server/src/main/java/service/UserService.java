@@ -20,7 +20,7 @@ public class UserService {
         if (user.username() == null || user.password() == null || user.email() == null) {
             throw new NullPointerException("Error: invalid request");
         }
-        if (userDAO.getUser(user) != null) {
+        if (userDAO.getUser(user.username()) != null) {
             throw new DataAccessException("Error: already taken");
         } else {
             userDAO.createUser(user);
@@ -35,7 +35,7 @@ public class UserService {
     public AuthData login(UserData user) throws DataAccessException {
         String username = user.username();
         AuthData auth;
-        UserData userData = userDAO.getUser(user);
+        UserData userData = userDAO.getUser(username);
         if (userData == null) {
             throw new DataAccessException("Error: invalid request");
         } else {

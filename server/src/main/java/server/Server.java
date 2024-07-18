@@ -6,6 +6,8 @@ import service.*;
 import spark.*;
 import com.google.gson.Gson;
 
+import java.util.HashMap;
+
 
 public class Server {
 
@@ -29,9 +31,10 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
-        Spark.post("/user", this::register);    //Body: { "username":"", "password":"", "email":"" }
+        Spark.post("/user", this::register);
         Spark.post("/session", this::login);
         Spark.delete("/session", this::logout);
+        Spark.get("/game", this::listGames);
         Spark.post("/game", this::createGame);
 
         Spark.delete("/db", this::clear);
@@ -57,7 +60,6 @@ public class Server {
         String resultJson;
         Gson serializer = new Gson();
 
-
         try {
             UserData data = serializer.fromJson(req.body(), UserData.class);
             AuthData auth = userService.register(data);
@@ -69,7 +71,6 @@ public class Server {
             res.status(400);
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
         }
-
 
         return resultJson;
     }
@@ -92,7 +93,6 @@ public class Server {
 
     private String logout(Request req, Response res) throws Exception {
         String resultJson;
-        Gson serializer = new Gson();
         String authToken = req.headers("Authorization");
         try {
             userService.logout(authToken);
@@ -101,6 +101,21 @@ public class Server {
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
             res.status(401);
         }
+        return resultJson;
+    }
+
+    private String listGames(Request req, Response res) {
+        String resultJson;
+        Gson serializer = new Gson();
+        String authToken = req.headers("Authorization");
+        try {
+            HashMap<Integer, GameData> games = gameService.listGames(authToken);
+            resultJson = serializer.toJson(games);
+        } catch (DataAccessException ex) {
+            resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
+            res.status(401);
+        }
+
         return resultJson;
     }
 
@@ -126,7 +141,6 @@ public class Server {
 
     private String clear(Request req, Response res) throws Exception {
         String authJson = "{}";
-        Gson serializer = new Gson();
         clearService.clear();
         return authJson;
     }
