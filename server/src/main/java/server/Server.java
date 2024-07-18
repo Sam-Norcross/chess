@@ -1,5 +1,6 @@
 package server;
 
+import chess.ChessGame;
 import dataaccess.*;
 import model.*;
 import service.*;
@@ -36,7 +37,7 @@ public class Server {
         Spark.delete("/session", this::logout);
         Spark.get("/game", this::listGames);
         Spark.post("/game", this::createGame);
-
+        Spark.put("/game", this::joinGame);
         Spark.delete("/db", this::clear);
 
         //This line initializes the server and can be removed once you have a functioning endpoint 
@@ -136,7 +137,22 @@ public class Server {
         return resultJson;
     }
 
+    private String joinGame(Request req, Response res) throws DataAccessException {
+        String resultJson = "TEST";
+        String authToken = req.headers("Authorization");
 
+        System.out.println(req.body()); //{"playerColor":"WHITE","gameID":1}
+        //TODO--create a joinRequest record to serialize the JSON?
+
+        try {
+            gameService.joinGame(authToken, color, gameID);
+        } catch (DataAccessException ex) {
+            resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
+            res.status(401);
+        }
+
+        return resultJson;
+    }
 
 
     private String clear(Request req, Response res) throws Exception {

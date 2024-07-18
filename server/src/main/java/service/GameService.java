@@ -27,9 +27,9 @@ public class GameService {
         return gameDAO.createGame(gameName);
     }
 
-//    public GameData joinGame() {
-//
-//    }
+    public GameData joinGame(String authToken, ChessGame.TeamColor color, int gameID) throws DataAccessException {
+
+    }
 
     private void verifyAuth(String authToken) throws DataAccessException {
         AuthData auth = userDAO.getAuth(authToken);
