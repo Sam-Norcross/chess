@@ -58,18 +58,16 @@ public class Server {
     private String register(Request req, Response res) throws Exception {
         String authJson;
         Gson serializer = new Gson();
+
+        System.out.println("AAAAA");
+
         try {
             UserData data = serializer.fromJson(req.body(), UserData.class);
             AuthData auth = userService.register(data);
             authJson = serializer.toJson(auth);
-            System.out.println(authJson);
         } catch (DataAccessException ex) {
             res.status(403);
-
-            //TODO--serialize exception to JSON for return?
-            authJson = serializer.toJson(ex.getMessage()); //"{ \"message\": \"Error: already taken\" }";
-            System.out.println("CCC");
-            System.out.println(authJson);
+            authJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
         }
 
 
@@ -85,8 +83,8 @@ public class Server {
             AuthData auth = userService.login(data);
             authJson = serializer.toJson(auth);
         } catch (DataAccessException ex) {
-            //Handler errors
-            authJson = "TEST (ERROR)";
+            authJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
+            res.status(401); //TODO--does this need to have more error codes? there is also a 500 in the specs
         }
 
         return authJson;
@@ -95,8 +93,6 @@ public class Server {
     private String logout(Request req, Response res) throws Exception {
         String authJson;
         Gson serializer = new Gson();
-
-        System.out.println(req.body());
 
         try {
 

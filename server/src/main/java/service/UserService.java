@@ -34,8 +34,9 @@ public class UserService {
         String username = user.username();
         AuthData auth;
         UserData userData = userDAO.getUser(username);
-        if (userData == null) {
-            throw new DataAccessException("Error: MESSAGE HERE");
+
+        if (userData == null || username == null || user.password() == null || user.email() == null) {
+            throw new DataAccessException("Error: invalid request");
         } else {
             if (!username.equals(userData.username()) || !user.password().equals(userData.password())) {
                 throw new DataAccessException("Error: MESSAGE HERE (incorrect login info)");
