@@ -18,7 +18,7 @@ class UserServiceTest {
     }
 
     @Test
-    public void registerNewUser() throws DataAccessException {
+    public void registerNewUser() {
         assertDoesNotThrow(() -> userService.register(new UserData("Bob", "12345", "bob@gmail.com")));
     }
 
@@ -29,7 +29,12 @@ class UserServiceTest {
     }
 
     @Test
-    public void loginValidUser() throws DataAccessException {
+    public void registerInvalidUser() {
+        assertThrows(NullPointerException.class, () -> userService.register(new UserData("Bob", null, "bob@gmail.com")));
+    }
+
+    @Test
+    public void loginValidUser() throws Exception {
         userService.register(new UserData("Bob", "12345", "bob@gmail.com"));
         assertDoesNotThrow(() -> userService.login(new UserData("Bob", "12345", "bob@gmail.com")));
     }

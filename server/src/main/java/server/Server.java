@@ -55,11 +55,10 @@ public class Server {
 
     //Handler methods
 
-    private String register(Request req, Response res) throws Exception {
+    private String register(Request req, Response res) {
         String authJson;
         Gson serializer = new Gson();
 
-        System.out.println("AAAAA");
 
         try {
             UserData data = serializer.fromJson(req.body(), UserData.class);
@@ -67,6 +66,9 @@ public class Server {
             authJson = serializer.toJson(auth);
         } catch (DataAccessException ex) {
             res.status(403);
+            authJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
+        } catch (NullPointerException ex) {
+            res.status(400);
             authJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
         }
 

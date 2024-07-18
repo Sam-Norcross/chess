@@ -15,9 +15,12 @@ public class UserService {
         this.userDAO = userDAO;
     }
 
-    public AuthData register(UserData user) throws DataAccessException {
+    public AuthData register(UserData user) throws DataAccessException, NullPointerException {
         String username = user.username();
         AuthData auth;
+        if (username == null || user.password() == null || user.email() == null) {
+            throw new NullPointerException("Error: invalid request");
+        }
         if (userDAO.getUser(username) != null) {
             throw new DataAccessException("Error: already taken");
         } else {
@@ -34,8 +37,7 @@ public class UserService {
         String username = user.username();
         AuthData auth;
         UserData userData = userDAO.getUser(username);
-
-        if (userData == null || username == null || user.password() == null || user.email() == null) {
+        if (userData == null) {
             throw new DataAccessException("Error: invalid request");
         } else {
             if (!username.equals(userData.username()) || !user.password().equals(userData.password())) {
