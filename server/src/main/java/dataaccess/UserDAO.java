@@ -6,11 +6,15 @@ import org.eclipse.jetty.server.Authentication;
 
 public interface UserDAO {
 
-    public UserData getUser(String Username) throws DataAccessException;
+    public void createUser(UserData user);
 
-    public void createUser(UserData user) throws DataAccessException;
+    public UserData getUser(UserData user);
 
-    public void createAuth(AuthData auth) throws DataAccessException;
+    public void createAuth(AuthData auth);
+
+    public AuthData getAuth(String authToken);
+
+    public void removeAuth(String authToken);
 
     public void clearUsers();
 

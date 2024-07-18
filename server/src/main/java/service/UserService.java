@@ -16,12 +16,11 @@ public class UserService {
     }
 
     public AuthData register(UserData user) throws DataAccessException, NullPointerException {
-        String username = user.username();
         AuthData auth;
-        if (username == null || user.password() == null || user.email() == null) {
+        if (user.username() == null || user.password() == null || user.email() == null) {
             throw new NullPointerException("Error: invalid request");
         }
-        if (userDAO.getUser(username) != null) {
+        if (userDAO.getUser(user) != null) {
             throw new DataAccessException("Error: already taken");
         } else {
             userDAO.createUser(user);
@@ -36,7 +35,7 @@ public class UserService {
     public AuthData login(UserData user) throws DataAccessException {
         String username = user.username();
         AuthData auth;
-        UserData userData = userDAO.getUser(username);
+        UserData userData = userDAO.getUser(user);
         if (userData == null) {
             throw new DataAccessException("Error: invalid request");
         } else {
@@ -52,8 +51,13 @@ public class UserService {
         return auth;
     }
 
-    public void logout(UserData user) {
-
+    public void logout(String authToken) throws DataAccessException, NullPointerException {
+        AuthData authFromData = userDAO.getAuth(authToken);
+        if (authFromData == null) {
+            throw new DataAccessException("Error: unauthorized");
+        } else {
+            userDAO.removeAuth(authToken);
+        }
     }
 
 }

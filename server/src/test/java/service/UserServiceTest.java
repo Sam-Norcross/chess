@@ -1,20 +1,24 @@
 package service;
 
 import dataaccess.DataAccessException;
-import dataaccess.MemoryUserDAO;
+import dataaccess.*;
 import model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserServiceTest {
 
     private UserService userService;
+    private UserDAO userDAO;
 
     @BeforeEach
     public void init() {
-        userService = new UserService(new MemoryUserDAO());
+        this.userDAO = new MemoryUserDAO();
+        userService = new UserService(userDAO);
     }
 
     @Test
@@ -49,6 +53,22 @@ class UserServiceTest {
     @Test
     public void loginInvalidUser() throws DataAccessException {
         assertThrows(DataAccessException.class, () -> userService.login(new UserData("Bob", "12345", "bob@gmail.com")));
+    }
+
+    @Test
+    public void logout() throws DataAccessException {
+        UserData user = new UserData("Bob", "12345", "bob@gmail.com");
+        String authToken = userService.register(user).authToken();
+        assertDoesNotThrow(() -> userService.logout(authToken));
+        assertEquals(null, userDAO.getAuth(authToken));
+    }
+
+    @Test
+    public void logoutInvalidAuth() throws DataAccessException {
+        UserData user = new UserData("Bob", "12345", "bob@gmail.com");
+        userService.register(user);
+        String authToken = UUID.randomUUID().toString();
+        assertThrows(DataAccessException.class, () -> userService.logout(authToken));
     }
 
 }

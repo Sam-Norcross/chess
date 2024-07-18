@@ -95,14 +95,14 @@ public class Server {
     private String logout(Request req, Response res) throws Exception {
         String authJson;
         Gson serializer = new Gson();
-
+        String authToken = req.headers("Authorization");
         try {
-
+            userService.logout(authToken);
             authJson = "{}";
-        } catch (Exception ex) {
-            authJson = "TEST (ERROR)";
+        } catch (DataAccessException ex) {
+            authJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
+            res.status(401);
         }
-
         return authJson;
     }
 
