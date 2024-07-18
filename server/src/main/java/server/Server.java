@@ -1,11 +1,8 @@
 package server;
 
 import dataaccess.*;
-import model.AuthData;
-import model.UserData;
-import service.ClearService;
-import service.GameService;
-import service.UserService;
+import model.*;
+import service.*;
 import spark.*;
 import com.google.gson.Gson;
 
@@ -21,7 +18,7 @@ public class Server {
         GameDAO gameDAO = new MemoryGameDAO();
 
         this.userService = new UserService(userDAO);
-        this.gameService = new GameService(gameDAO);
+        this.gameService = new GameService(userDAO, gameDAO);
         this.clearService = new ClearService(userDAO, gameDAO);
 
     }
@@ -35,6 +32,7 @@ public class Server {
         Spark.post("/user", this::register);    //Body: { "username":"", "password":"", "email":"" }
         Spark.post("/session", this::login);
         Spark.delete("/session", this::logout);
+        Spark.post("/game", this::createGame);
 
         Spark.delete("/db", this::clear);
 
@@ -56,54 +54,71 @@ public class Server {
     //Handler methods
 
     private String register(Request req, Response res) {
-        String authJson;
+        String resultJson;
         Gson serializer = new Gson();
 
 
         try {
             UserData data = serializer.fromJson(req.body(), UserData.class);
             AuthData auth = userService.register(data);
-            authJson = serializer.toJson(auth);
+            resultJson = serializer.toJson(auth);
         } catch (DataAccessException ex) {
             res.status(403);
-            authJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
+            resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
         } catch (NullPointerException ex) {
             res.status(400);
-            authJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
+            resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
         }
 
 
-        return authJson;
+        return resultJson;
     }
 
     private String login(Request req, Response res) throws Exception {
-        String authJson;
+        String resultJson;
         Gson serializer = new Gson();
 
         try {
             UserData data = serializer.fromJson(req.body(), UserData.class);
             AuthData auth = userService.login(data);
-            authJson = serializer.toJson(auth);
+            resultJson = serializer.toJson(auth);
         } catch (DataAccessException ex) {
-            authJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
+            resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
             res.status(401); //TODO--does this need to have more error codes? there is also a 500 in the specs
         }
 
-        return authJson;
+        return resultJson;
     }
 
     private String logout(Request req, Response res) throws Exception {
-        String authJson;
+        String resultJson;
         Gson serializer = new Gson();
         String authToken = req.headers("Authorization");
         try {
             userService.logout(authToken);
-            authJson = "{}";
+            resultJson = "{}";
         } catch (DataAccessException ex) {
-            authJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
+            resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
             res.status(401);
         }
-        return authJson;
+        return resultJson;
+    }
+
+    private String createGame(Request req, Response res) throws DataAccessException {
+        String resultJson;
+        String authToken = req.headers("Authorization");
+        String gameName = req.body();
+
+        try {
+            GameData gameData = gameService.createGame(authToken, gameName);
+            resultJson = "{ \"gameID\": " + gameData.gameID() + "}"; //new Gson().toJson(gameData.gameID());
+        } catch (DataAccessException ex) {
+            resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
+            res.status(401);
+        }
+
+
+        return resultJson;
     }
 
 

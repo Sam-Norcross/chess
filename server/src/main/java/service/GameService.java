@@ -1,27 +1,39 @@
 package service;
 
-import dataaccess.GameDAO;
-import model.GameData;
-
-import java.util.Collection;
+import chess.ChessGame;
+import dataaccess.*;
+import model.*;
 
 public class GameService {
 
+    private final UserDAO userDAO;
     private final GameDAO gameDAO;
 
-    public GameService(GameDAO gameDAO) {
+    public GameService(UserDAO userDAO, GameDAO gameDAO) {
         this.gameDAO = gameDAO;
+        this.userDAO = userDAO;
     }
 
-//    public Collection<GameData> listGames() {
-//
-//    }
-//
-//    public GameData createGame() {
-//
-//    }
-//
+    public GameData createGame(String authToken, String gameName) throws DataAccessException {
+        AuthData auth = userDAO.getAuth(authToken);
+        GameData gameData;
+
+        if (auth == null) {
+            throw new DataAccessException("Error: unauthorized");
+        }
+        else {
+            gameData = gameDAO.createGame(gameName);
+        }
+
+        return gameData;
+    }
+
 //    public GameData joinGame() {
 //
 //    }
+//
+//    public Collection<GameData> listGames() {
+//
+//    }
+
 }

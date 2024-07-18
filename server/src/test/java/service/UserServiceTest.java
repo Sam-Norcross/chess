@@ -1,6 +1,5 @@
 package service;
 
-import dataaccess.DataAccessException;
 import dataaccess.*;
 import model.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,9 +14,10 @@ class UserServiceTest {
     private UserService userService;
     private UserDAO userDAO;
 
+
     @BeforeEach
     public void init() {
-        this.userDAO = new MemoryUserDAO();
+        userDAO = new MemoryUserDAO();
         userService = new UserService(userDAO);
     }
 
