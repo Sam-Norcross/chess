@@ -76,7 +76,7 @@ public class Server {
         return resultJson;
     }
 
-    private String login(Request req, Response res) throws Exception {
+    private String login(Request req, Response res) {
         String resultJson;
         Gson serializer = new Gson();
 
@@ -92,7 +92,7 @@ public class Server {
         return resultJson;
     }
 
-    private String logout(Request req, Response res) throws Exception {
+    private String logout(Request req, Response res) {
         String resultJson;
         String authToken = req.headers("Authorization");
         try {
@@ -120,7 +120,7 @@ public class Server {
         return resultJson;
     }
 
-    private String createGame(Request req, Response res) throws DataAccessException {
+    private String createGame(Request req, Response res) {
         String resultJson;
         String authToken = req.headers("Authorization");
         String gameName = req.body();
@@ -137,21 +137,28 @@ public class Server {
         return resultJson;
     }
 
-    private String joinGame(Request req, Response res) throws DataAccessException {
-        String resultJson = "TEST";
+    private String joinGame(Request req, Response res) {
+        Gson serializer = new Gson();
+        String resultJson = "{}";
         String authToken = req.headers("Authorization");
 
-        System.out.println(req.body()); //{"playerColor":"WHITE","gameID":1}
-        //TODO--create a joinRequest record to serialize the JSON?
+        JoinRequest request = serializer.fromJson(req.body(), JoinRequest.class);
 
         try {
-            gameService.joinGame(authToken, color, gameID);
+            gameService.joinGame(authToken, request);
+        } catch (NullPointerException ex) {
+            resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
+            res.status(400);
+        }  catch (IllegalArgumentException ex) {
+            resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
+            res.status(403);
         } catch (DataAccessException ex) {
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
             res.status(401);
         }
 
-        return resultJson;
+
+        return resultJson;  //TODO--the function seems to be working completely as expected, not sure what the error is
     }
 
 

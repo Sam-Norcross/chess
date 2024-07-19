@@ -1,8 +1,10 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.*;
 import model.AuthData;
 import model.GameData;
+import model.JoinRequest;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,10 +30,14 @@ public class GameServiceTest {
         gameService = new GameService(userDAO, gameDAO);
     }
 
-    public String registerAndLogin() throws DataAccessException { //Helper function to simplify tests
-        userService.register(new UserData("Bob", "12345", "bob@gmail.com"));
-        AuthData auth = userService.login(new UserData("Bob", "12345", "bob@gmail.com"));
+    public String registerAndLogin(UserData user) throws DataAccessException { //Helper function to simplify tests
+        userService.register(user);
+        AuthData auth = userService.login(user);
         return auth.authToken();
+    }
+
+    public String registerAndLogin() throws DataAccessException { //Helper function to simplify tests
+        return registerAndLogin(new UserData("Bob", "12345", "bob@gmail.com"));
     }
 
     @Test
@@ -66,4 +72,37 @@ public class GameServiceTest {
         assertThrows(DataAccessException.class, () -> gameService.listGames(badAuthToken));
     }
 
+    @Test
+    public void joinGame() throws DataAccessException {
+        String authToken = registerAndLogin();
+        int gameID = gameService.createGame(authToken, "Bob's game").gameID();
+
+        assertDoesNotThrow(() -> gameService.joinGame(authToken, new JoinRequest(gameID, ChessGame.TeamColor.WHITE)));
+        GameData game = gameDAO.getGame(gameID);
+        assertEquals(game.whiteUsername(), "Bob");
+    }
+
+    @Test
+    public void joinGameColorTaken() throws DataAccessException {
+        String authToken = registerAndLogin();
+        String authToken2 = registerAndLogin(new UserData("Alice", "67890", "Alice@gmail.com"));
+        int gameID = gameService.createGame(authToken2, "Alice's game").gameID();
+
+        //Alice joins the game
+        gameService.joinGame(authToken2, new JoinRequest(gameID, ChessGame.TeamColor.WHITE));
+
+        //Bob tries to join the game with the same color
+        assertThrows(IllegalArgumentException.class, () -> gameService.joinGame(authToken, new JoinRequest(gameID, ChessGame.TeamColor.WHITE)));
+        GameData game = gameDAO.getGame(gameID);
+        assertEquals(game.whiteUsername(), "Alice");
+    }
+
+    @Test
+    public void joinGameBadID() throws DataAccessException {
+        String authToken = registerAndLogin();
+        int gameID = gameService.createGame(authToken, "Bob's game").gameID() + 5;
+
+        assertThrows(NullPointerException.class, () -> gameService.joinGame(authToken, new JoinRequest(gameID, ChessGame.TeamColor.WHITE)));
+
+    }
 }

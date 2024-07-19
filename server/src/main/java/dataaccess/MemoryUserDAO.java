@@ -41,6 +41,16 @@ public class MemoryUserDAO implements UserDAO {
     }
 
     @Override
+    public String getUsernameFromAuth(String authToken) {
+        for (String username : authData.keySet()) {
+            if (authData.get(username).authToken().equals(authToken)) {
+                return username;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public void removeAuth(String authToken) {
         for (AuthData auth : authData.values()) {
             if (auth.authToken().equals(authToken)) {

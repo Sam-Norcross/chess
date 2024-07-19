@@ -13,6 +13,10 @@ public interface GameDAO {
 
     void clearGames();
 
+    GameData getGame(int gameID);
+
+    void updateGame(int gameID, GameData gameData);
+
     HashMap<Integer, GameData> getGames();
 
 }
