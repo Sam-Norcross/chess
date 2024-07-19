@@ -67,7 +67,14 @@ public class GameService {
     private void verifyAuth(String authToken) throws DataAccessException {
         AuthData auth = userDAO.getAuth(authToken);
 
+        System.out.println(authToken);
+
+
         if (auth == null) {
+
+            System.out.println("XXX");
+
+
             throw new DataAccessException("Error: unauthorized");
         }
     }

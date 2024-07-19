@@ -86,7 +86,7 @@ public class Server {
             resultJson = serializer.toJson(auth);
         } catch (DataAccessException ex) {
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
-            res.status(401); //TODO--does this need to have more error codes? there is also a 500 in the specs
+            res.status(401);
         }
 
         return resultJson;
@@ -125,12 +125,19 @@ public class Server {
         String authToken = req.headers("Authorization");
         String gameName = req.body();
 
+        System.out.println("AAA");
+
+
         try {
             GameData gameData = gameService.createGame(authToken, gameName);
             resultJson = "{ \"gameID\": " + gameData.gameID() + "}"; //new Gson().toJson(gameData.gameID());
         } catch (DataAccessException ex) {
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
             res.status(401);
+
+            System.out.println("CCC");
+
+
         }
 
 
@@ -156,7 +163,6 @@ public class Server {
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
             res.status(401);
         }
-
 
         return resultJson;  //TODO--the function seems to be working completely as expected, not sure what the error is
     }

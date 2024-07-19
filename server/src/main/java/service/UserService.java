@@ -36,17 +36,22 @@ public class UserService {
         String username = user.username();
         AuthData auth;
         UserData userData = userDAO.getUser(username);
+
         if (userData == null) {
             throw new DataAccessException("Error: invalid request");
         } else {
             if (!username.equals(userData.username()) || !user.password().equals(userData.password())) {
                 throw new DataAccessException("Error: MESSAGE HERE (incorrect login info)");
             } else {
+
                 String authToken = UUID.randomUUID().toString();
                 auth = new AuthData(user.username(), authToken);
                 userDAO.createAuth(auth);
             }
         }
+
+        System.out.println(userData);
+        System.out.println(auth);
 
         return auth;
     }
