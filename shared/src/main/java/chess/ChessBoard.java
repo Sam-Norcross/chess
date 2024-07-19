@@ -140,37 +140,7 @@ public class ChessBoard {
                 if (squares[r][c] == null) {
                     result += " ";
                 } else {
-                    ChessPiece.PieceType type = squares[r][c].getPieceType();
-                    ChessGame.TeamColor color = squares[r][c].getTeamColor();
-                    if (color == ChessGame.TeamColor.WHITE) {
-                        if (type == ChessPiece.PieceType.PAWN) {
-                            result += "P";
-                        } else if (type == ChessPiece.PieceType.ROOK) {
-                            result += "R";
-                        } else if (type == ChessPiece.PieceType.KNIGHT) {
-                            result += "N";
-                        } else if (type == ChessPiece.PieceType.BISHOP) {
-                            result += "B";
-                        } else if (type == ChessPiece.PieceType.KING) {
-                            result += "K";
-                        } else if (type == ChessPiece.PieceType.QUEEN) {
-                            result += "Q";
-                        }
-                    } else {
-                        if (type == ChessPiece.PieceType.PAWN) {
-                            result += "p";
-                        } else if (type == ChessPiece.PieceType.ROOK) {
-                            result += "r";
-                        } else if (type == ChessPiece.PieceType.KNIGHT) {
-                            result += "n";
-                        } else if (type == ChessPiece.PieceType.BISHOP) {
-                            result += "b";
-                        } else if (type == ChessPiece.PieceType.KING) {
-                            result += "k";
-                        } else if (type == ChessPiece.PieceType.QUEEN) {
-                            result += "q";
-                        }
-                    }
+                    result += squares[r][c].toStringSimple();
                 }
             }
             result += "|\n";
@@ -178,4 +148,5 @@ public class ChessBoard {
         result += "   1 2 3 4 5 6 7 8\n";
         return result;
     }
+
 }

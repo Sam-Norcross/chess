@@ -106,34 +106,22 @@ public class ChessPiece {
                     moves.add(new ChessMove(myPosition, new ChessPosition(myPosition.getRow() + forward * 2, myPosition.getColumn())));
                 }
             }
+
             //Capturing pieces
-            newPosition = new ChessPosition(myPosition.getRow() + forward, myPosition.getColumn() + 1);
-            if (newPosition.isValid() && !board.isEmpty(newPosition)) {
-                if (isEnemy(board.getPiece(newPosition))) {
-                    if (myPosition.getRow() + forward == end) { //Promotion handling
-                        moves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
-                        moves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
-                        moves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
-                        moves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
+            for (int i = -1; i < 2; i += 2) {
+                newPosition = new ChessPosition(myPosition.getRow() + forward, myPosition.getColumn() + i);
+                if (newPosition.isValid() && !board.isEmpty(newPosition)) {
+                    if (isEnemy(board.getPiece(newPosition))) {
+                        if (myPosition.getRow() + forward == end) { //Promotion handling
+                            moves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
+                            moves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
+                            moves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                            moves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
 
-                    } else {
-                        moves.add(new ChessMove(myPosition, newPosition));
+                        } else {
+                            moves.add(new ChessMove(myPosition, newPosition));
+                        }
                     }
-                }
-            }
-            newPosition = new ChessPosition(myPosition.getRow() + forward, myPosition.getColumn() - 1);
-            if (newPosition.isValid() && !board.isEmpty(newPosition)) {
-                if (isEnemy(board.getPiece(newPosition))) {
-                    if (myPosition.getRow() + forward == end) { //Promotion handling
-                        moves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
-                        moves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
-                        moves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
-                        moves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
-
-                    } else {
-                        moves.add(new ChessMove(myPosition, newPosition));
-                    }
-
                 }
             }
         return moves;
@@ -268,4 +256,28 @@ public class ChessPiece {
     public String toString() {
         return "ChessPiece: type=" + type + ", pieceColor=" + pieceColor;
     }
+
+    public String toStringSimple() {
+        String piece = "";
+        if (type == ChessPiece.PieceType.PAWN) {
+            piece = "P";
+        } else if (type == ChessPiece.PieceType.ROOK) {
+            piece = "R";
+        } else if (type == ChessPiece.PieceType.KNIGHT) {
+            piece = "N";
+        } else if (type == ChessPiece.PieceType.BISHOP) {
+            piece = "B";
+        } else if (type == ChessPiece.PieceType.KING) {
+            piece = "K";
+        } else if (type == ChessPiece.PieceType.QUEEN) {
+            piece = "Q";
+        }
+
+        if (pieceColor == ChessGame.TeamColor.BLACK) {
+            return piece.toLowerCase();
+        } else {
+            return piece;
+        }
+    }
+
 }

@@ -153,7 +153,7 @@ public class Server {
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
             res.status(401);
         }
-        return resultJson;  //TODO--the function seems to be working completely as expected, not sure what the error is
+        return resultJson;
     }
 
 
