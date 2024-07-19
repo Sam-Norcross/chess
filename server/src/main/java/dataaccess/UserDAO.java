@@ -14,8 +14,6 @@ public interface UserDAO {
 
     AuthData getAuth(String authToken);
 
-    String getUsernameFromAuth(String authToken);
-
     void removeAuth(String authToken);
 
     void clearUsers();

@@ -60,7 +60,7 @@ class UserServiceTest {
         UserData user = new UserData("Bob", "12345", "bob@gmail.com");
         String authToken = userService.register(user).authToken();
         assertDoesNotThrow(() -> userService.logout(authToken));
-        assertEquals(null, userDAO.getAuth(authToken));
+        assertNull(userDAO.getAuth(authToken));
     }
 
     @Test

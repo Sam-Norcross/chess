@@ -49,10 +49,6 @@ public class UserService {
                 userDAO.createAuth(auth);
             }
         }
-
-        System.out.println(userData);
-        System.out.println(auth);
-
         return auth;
     }
 

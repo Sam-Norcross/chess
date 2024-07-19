@@ -8,7 +8,7 @@ import java.util.HashMap;
 public class MemoryUserDAO implements UserDAO {
 
     private HashMap<String, UserData> users;
-    private HashMap<String, AuthData> authData; //TODO--should be authToken, authData, not username, authData
+    private HashMap<String, AuthData> authData; //authToken, authData
 
     public MemoryUserDAO() {
         users = new HashMap<>();
@@ -33,33 +33,12 @@ public class MemoryUserDAO implements UserDAO {
     @Override
     public AuthData getAuth(String authToken) {
         return authData.get(authToken);
-
-//        for (AuthData auth : authData.values()) {
-//            if (auth.authToken().equals(authToken)) {
-//                return auth;
-//            }
-//        }
-//        return null;
-    }
-
-    @Override
-    public String getUsernameFromAuth(String authToken) {   //TODO--unncessary
-        return authData.get(authToken).username();
-
-//        for (String username : authData.keySet()) {
-//            if (authData.get(username).authToken().equals(authToken)) {
-//                return username;
-//            }
-//        }
-//        return null;
     }
 
     @Override
     public void removeAuth(String authToken) {
         for (AuthData auth : authData.values()) {
-            if (auth.authToken().equals(authToken)) {
-                authData.remove(auth.username());
-            }
+            authData.remove(auth.authToken());
         }
     }
 

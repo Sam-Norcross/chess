@@ -3,6 +3,7 @@ package dataaccess;
 import chess.ChessGame;
 import model.GameData;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public interface GameDAO {
@@ -17,6 +18,6 @@ public interface GameDAO {
 
     void updateGame(int gameID, GameData gameData);
 
-    HashMap<Integer, GameData> getGames();
+    ArrayList<GameData> getGames();
 
 }

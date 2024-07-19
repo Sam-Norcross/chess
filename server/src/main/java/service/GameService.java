@@ -4,6 +4,7 @@ import chess.ChessGame;
 import dataaccess.*;
 import model.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -17,7 +18,7 @@ public class GameService {
         this.userDAO = userDAO;
     }
 
-    public HashMap<Integer, GameData> listGames(String authToken) throws DataAccessException {
+    public ArrayList<GameData> listGames(String authToken) throws DataAccessException {
         verifyAuth(authToken);
         return gameDAO.getGames();
     }
@@ -40,7 +41,7 @@ public class GameService {
         }
 
         ChessGame.TeamColor color = request.playerColor();
-        String username = userDAO.getUsernameFromAuth(authToken);
+        String username = userDAO.getAuth(authToken).username();
         String whiteUsername = gameData.whiteUsername();
         String blackUsername = gameData.blackUsername();
 
@@ -66,15 +67,7 @@ public class GameService {
 
     private void verifyAuth(String authToken) throws DataAccessException {
         AuthData auth = userDAO.getAuth(authToken);
-
-        System.out.println(authToken);
-
-
         if (auth == null) {
-
-            System.out.println("XXX");
-
-
             throw new DataAccessException("Error: unauthorized");
         }
     }

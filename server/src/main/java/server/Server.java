@@ -7,6 +7,7 @@ import service.*;
 import spark.*;
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 
@@ -80,6 +81,8 @@ public class Server {
         String resultJson;
         Gson serializer = new Gson();
 
+        System.out.println("AAA");
+
         try {
             UserData data = serializer.fromJson(req.body(), UserData.class);
             AuthData auth = userService.login(data);
@@ -88,6 +91,8 @@ public class Server {
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
             res.status(401);
         }
+
+        System.out.println(resultJson);
 
         return resultJson;
     }
@@ -110,13 +115,12 @@ public class Server {
         Gson serializer = new Gson();
         String authToken = req.headers("Authorization");
         try {
-            HashMap<Integer, GameData> games = gameService.listGames(authToken);
-            resultJson = serializer.toJson(games);
+            ArrayList<GameData> games = gameService.listGames(authToken);
+            resultJson = "{ \"games\": " + serializer.toJson(games) + " }";
         } catch (DataAccessException ex) {
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
             res.status(401);
         }
-
         return resultJson;
     }
 
@@ -124,23 +128,13 @@ public class Server {
         String resultJson;
         String authToken = req.headers("Authorization");
         String gameName = req.body();
-
-        System.out.println("AAA");
-
-
         try {
             GameData gameData = gameService.createGame(authToken, gameName);
             resultJson = "{ \"gameID\": " + gameData.gameID() + "}"; //new Gson().toJson(gameData.gameID());
         } catch (DataAccessException ex) {
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
             res.status(401);
-
-            System.out.println("CCC");
-
-
         }
-
-
         return resultJson;
     }
 
@@ -148,7 +142,6 @@ public class Server {
         Gson serializer = new Gson();
         String resultJson = "{}";
         String authToken = req.headers("Authorization");
-
         JoinRequest request = serializer.fromJson(req.body(), JoinRequest.class);
 
         try {
@@ -163,7 +156,6 @@ public class Server {
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
             res.status(401);
         }
-
         return resultJson;  //TODO--the function seems to be working completely as expected, not sure what the error is
     }
 
