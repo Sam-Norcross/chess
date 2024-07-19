@@ -81,8 +81,6 @@ public class Server {
         String resultJson;
         Gson serializer = new Gson();
 
-        System.out.println("AAA");
-
         try {
             UserData data = serializer.fromJson(req.body(), UserData.class);
             AuthData auth = userService.login(data);
@@ -92,14 +90,13 @@ public class Server {
             res.status(401);
         }
 
-        System.out.println(resultJson);
-
         return resultJson;
     }
 
     private String logout(Request req, Response res) {
         String resultJson;
         String authToken = req.headers("Authorization");
+
         try {
             userService.logout(authToken);
             resultJson = "{}";

@@ -37,9 +37,7 @@ public class MemoryUserDAO implements UserDAO {
 
     @Override
     public void removeAuth(String authToken) {
-        for (AuthData auth : authData.values()) {
-            authData.remove(auth.authToken());
-        }
+        authData.remove(authToken);
     }
 
 
