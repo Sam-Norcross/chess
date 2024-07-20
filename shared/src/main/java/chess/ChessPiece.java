@@ -148,9 +148,6 @@ public class ChessPiece {
             while (nextPosition.isValid() && board.isEmpty(nextPosition)) {
                 moves.add(new ChessMove(myPosition, nextPosition));
                 nextPosition = new ChessPosition(nextPosition.getRow() + r, nextPosition.getColumn() + c);
-                if (!nextPosition.isValid()) {
-                    break;
-                }
             }
 
             //Capture handling
@@ -172,9 +169,6 @@ public class ChessPiece {
                 while (nextPosition.isValid() && board.isEmpty(nextPosition)) {
                     moves.add(new ChessMove(myPosition, nextPosition));
                     nextPosition = new ChessPosition(nextPosition.getRow() + r, nextPosition.getColumn() + c);
-                    if (!nextPosition.isValid()) {
-                        break;
-                    }
                 }
 
                 //Capture handling
