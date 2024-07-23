@@ -2,6 +2,7 @@ package dataaccess;
 
 import model.AuthData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 import javax.xml.crypto.Data;
 import java.sql.*;
@@ -55,25 +56,25 @@ public class SQLUserDAO implements UserDAO {
     }
 
     @Override
-    public void createUser(UserData user) {
+    public void createUser(UserData user) throws DataAccessException {
         String statementString = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
 
         try {
             Connection connection = DatabaseManager.getConnection();
             try (PreparedStatement statement = connection.prepareStatement(statementString)) {
                 statement.setString(1, user.username());
-                statement.setString(2, user.password());
+                statement.setString(2, BCrypt.hashpw(user.password(), BCrypt.gensalt()));
                 statement.setString(3, user.email());
                 statement.executeUpdate();
             }
             connection.close();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException(e.getMessage());
         }
     }
 
     @Override
-    public UserData getUser(String username) {
+    public UserData getUser(String username) throws DataAccessException {
         UserData user;
         String queryString = "SELECT username, password, email FROM users WHERE username = ?";
 
@@ -88,30 +89,70 @@ public class SQLUserDAO implements UserDAO {
             }
             connection.close();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException(e.getMessage());
         }
 
         return user;
     }
 
     @Override
-    public void createAuth(AuthData auth) {
+    public void createAuth(AuthData auth) throws DataAccessException {
+        String statementString = "INSERT INTO auth (authToken, username) VALUES (?, ?)";
 
+        try {
+            Connection connection = DatabaseManager.getConnection();
+            try (PreparedStatement statement = connection.prepareStatement(statementString)) {
+                statement.setString(1, auth.authToken());
+                statement.setString(2, auth.username());
+                statement.executeUpdate();
+            }
+            connection.close();
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
     @Override
-    public AuthData getAuth(String authToken) {
-        return null;
+    public AuthData getAuth(String authToken) throws DataAccessException {
+        AuthData auth;
+        String queryString = "SELECT authToken, username FROM auth WHERE authToken = ?";
+
+        try {
+            Connection connection = DatabaseManager.getConnection();
+            try (PreparedStatement query = connection.prepareStatement(queryString)) {
+                query.setString(1, authToken);
+                ResultSet result = query.executeQuery();
+                result.next();
+                auth = new AuthData(result.getString(2), result.getString(1));
+                result.close();
+            }
+            connection.close();
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
+
+        return auth;
     }
 
     @Override
-    public void removeAuth(String authToken) {
+    public void removeAuth(String authToken) throws DataAccessException {
+        String statementString = "DELETE FROM auth WHERE authToken = ?";
 
+        try {
+            Connection connection = DatabaseManager.getConnection();
+            try (PreparedStatement query = connection.prepareStatement(statementString)) {
+                query.setString(1, authToken);
+                query.executeUpdate();
+            }
+            connection.close();
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
 
     @Override
-    public void clearUsers() {
+    public void clearUsers() throws DataAccessException {
         String statementString = "DELETE FROM users";
 
         try {
@@ -121,12 +162,12 @@ public class SQLUserDAO implements UserDAO {
             }
             connection.close();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException(e.getMessage());
         }
     }
 
     @Override
-    public void clearAuth() {
+    public void clearAuth() throws DataAccessException {
         String statementString = "DELETE FROM auth";
 
         try {
@@ -136,7 +177,7 @@ public class SQLUserDAO implements UserDAO {
             }
             connection.close();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException(e.getMessage());
         }
     }
 

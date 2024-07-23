@@ -16,9 +16,15 @@ class UserServiceTest {
 
 
     @BeforeEach
-    public void init() {
-        userDAO = new SQLUserDAO(); //MemoryUserDAO();
+    public void init() {//} throws Exception {
+        userDAO = new MemoryUserDAO();
         userService = new UserService(userDAO);
+
+
+//        userDAO = new SQLUserDAO();
+//        userService = new UserService(userDAO);
+//        userDAO.clearUsers();
+//        userDAO.clearAuth();
     }
 
     @Test
