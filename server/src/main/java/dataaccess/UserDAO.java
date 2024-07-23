@@ -10,6 +10,8 @@ public interface UserDAO {
 
     UserData getUser(String username) throws DataAccessException;
 
+    boolean checkPassword(String username, String password) throws DataAccessException;
+
     void createAuth(AuthData auth) throws DataAccessException;
 
     AuthData getAuth(String authToken) throws DataAccessException;

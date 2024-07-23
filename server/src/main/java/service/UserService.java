@@ -40,7 +40,7 @@ public class UserService {
         if (userData == null) {
             throw new DataAccessException("Error: invalid request");
         } else {
-            if (!username.equals(userData.username()) || !user.password().equals(userData.password())) {
+            if (!username.equals(userData.username()) || !userDAO.checkPassword(username, user.password())) {//!user.password().equals(userData.password())) {
                 throw new DataAccessException("Error: MESSAGE HERE (incorrect login info)");
             } else {
 

@@ -95,6 +95,13 @@ public class SQLUserDAO implements UserDAO {
         return user;
     }
 
+    public boolean checkPassword(String username, String password) throws DataAccessException {
+
+        System.out.println("TEST ME!");
+
+        return BCrypt.checkpw(password, getUser(username).password());
+    }
+
     @Override
     public void createAuth(AuthData auth) throws DataAccessException {
         String statementString = "INSERT INTO auth (authToken, username) VALUES (?, ?)";
