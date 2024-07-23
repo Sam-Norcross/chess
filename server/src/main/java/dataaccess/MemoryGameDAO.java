@@ -21,8 +21,7 @@ public class MemoryGameDAO implements GameDAO {
         return gameData;
     }
 
-    @Override
-    public int newGameID() {
+    private int newGameID() {
         return games.size() + 1;
     }
 

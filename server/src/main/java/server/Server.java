@@ -18,9 +18,8 @@ public class Server {
     private final ClearService clearService;
 
     public Server() {
-        UserDAO userDAO = new MemoryUserDAO();
-        GameDAO gameDAO = new MemoryGameDAO();
-
+        UserDAO userDAO = new SQLUserDAO(); //MemoryUserDAO();
+        GameDAO gameDAO = new SQLGameDAO(); //MemoryGameDAO();
         this.userService = new UserService(userDAO);
         this.gameService = new GameService(userDAO, gameDAO);
         this.clearService = new ClearService(userDAO, gameDAO);

@@ -10,8 +10,6 @@ public interface GameDAO {
 
     GameData createGame(String gameName);
 
-    int newGameID();
-
     void clearGames();
 
     GameData getGame(int gameID);

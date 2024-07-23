@@ -50,7 +50,7 @@ public class ClearServiceTest {
         gameService.createGame(authToken, UUID.randomUUID().toString());
 
         assertDoesNotThrow(() -> clearService.clear());
-        assertEquals(gameDAO.newGameID(), 1);
+        assertEquals(gameDAO.getGames().size(), 0);
         assertEquals(userDAO.getUser(userData.username()), null);
     }
 
@@ -64,7 +64,7 @@ public class ClearServiceTest {
         }
 
         assertDoesNotThrow(() -> clearService.clear());
-        assertEquals(gameDAO.newGameID(), 1);
+        assertEquals(gameDAO.getGames().size(), 0);
         assertEquals(userDAO.getUser(userData.username()), null);
     }
 
