@@ -41,9 +41,8 @@ public class UserService {
             throw new DataAccessException("Error: invalid request");
         } else {
             if (!username.equals(userData.username()) || !userDAO.checkPassword(username, user.password())) {//!user.password().equals(userData.password())) {
-                throw new DataAccessException("Error: MESSAGE HERE (incorrect login info)");
+                throw new DataAccessException("Error: incorrect login info");
             } else {
-
                 String authToken = UUID.randomUUID().toString();
                 auth = new AuthData(user.username(), authToken);
                 userDAO.createAuth(auth);

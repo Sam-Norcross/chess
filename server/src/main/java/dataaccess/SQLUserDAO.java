@@ -89,16 +89,14 @@ public class SQLUserDAO implements UserDAO {
             }
             connection.close();
         } catch (Exception e) {
-            throw new DataAccessException(e.getMessage());
+            return null;
+            //throw new DataAccessException(e.getMessage());
         }
 
         return user;
     }
 
     public boolean checkPassword(String username, String password) throws DataAccessException {
-
-        System.out.println("TEST ME!");
-
         return BCrypt.checkpw(password, getUser(username).password());
     }
 
@@ -135,7 +133,8 @@ public class SQLUserDAO implements UserDAO {
             }
             connection.close();
         } catch (Exception e) {
-            throw new DataAccessException(e.getMessage());
+            return null;
+            //throw new DataAccessException(e.getMessage());
         }
 
         return auth;

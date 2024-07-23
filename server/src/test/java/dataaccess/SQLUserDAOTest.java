@@ -48,7 +48,7 @@ class SQLUserDAOTest {
     @Test
     public void getNonExistingUser() throws DataAccessException {
         userDAO.createUser(userBob);
-        assertThrows(DataAccessException.class, () -> userDAO.getUser("Fred"));
+        assertNull(userDAO.getUser("Fred"));
     }
 
     @Test
@@ -78,7 +78,7 @@ class SQLUserDAOTest {
         userDAO.createUser(userBob);
         String authToken = UUID.randomUUID().toString();
         userDAO.createAuth(new AuthData(userBob.username(), authToken));
-        assertThrows(DataAccessException.class, () -> userDAO.getAuth(UUID.randomUUID().toString()));
+        assertNull(userDAO.getAuth(UUID.randomUUID().toString()));
     }
 
     @Test
@@ -87,7 +87,7 @@ class SQLUserDAOTest {
         String authToken = UUID.randomUUID().toString();
         userDAO.createAuth(new AuthData(userBob.username(), authToken));
         assertDoesNotThrow(() -> userDAO.removeAuth(authToken));
-        assertThrows(DataAccessException.class, () -> userDAO.getAuth(authToken));
+        assertNull(userDAO.getAuth(authToken));
     }
 
     @Test
