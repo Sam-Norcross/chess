@@ -8,9 +8,9 @@ import java.util.HashMap;
 
 public interface GameDAO {
 
-    GameData createGame(String gameName);
+    GameData createGame(String gameName) throws DataAccessException;
 
-    void clearGames();
+    void clearGames() throws DataAccessException;
 
     GameData getGame(int gameID);
 

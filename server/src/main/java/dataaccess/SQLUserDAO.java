@@ -10,7 +10,7 @@ import java.sql.*;
 public class SQLUserDAO implements UserDAO {
 
     //users table: username, password, email (<Sting, UserData>)
-    String usersInit = """
+    private String usersInit = """
                             CREATE TABLE IF NOT EXISTS users (
                             username varchar(255),
                             password varchar(255),
@@ -19,7 +19,7 @@ public class SQLUserDAO implements UserDAO {
                         """;
 
     //auth table: authToken, username (<String, authData>)
-    String authInit = """
+    private String authInit = """
                             CREATE TABLE IF NOT EXISTS auth (
                             authToken varchar(255),
                             username varchar(255)
@@ -28,12 +28,8 @@ public class SQLUserDAO implements UserDAO {
 
     public SQLUserDAO() {//} throws DataAccessException {
 
-//        try {
-
-            //DatabaseManager.createDatabase();
             try {
-
-                DatabaseManager.createDatabase(); //NEW
+                DatabaseManager.createDatabase();
 
                 Connection connection = DatabaseManager.getConnection();
                 try (PreparedStatement userStatement = connection.prepareStatement(usersInit);
@@ -42,16 +38,8 @@ public class SQLUserDAO implements UserDAO {
                     authStatement.executeUpdate();
                 }
             } catch (Exception e) { //(SQLException e) {
-                //throw new DataAccessException(e.getMessage());
-
                 throw new RuntimeException(e.getMessage()); //NEW
-
             }
-
-
-//        } catch (DataAccessException e) {
-//            throw new RuntimeException(e.getMessage());
-//        }
 
     }
 
