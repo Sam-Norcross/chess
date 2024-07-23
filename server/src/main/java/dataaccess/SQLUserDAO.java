@@ -4,9 +4,7 @@ import model.AuthData;
 import model.UserData;
 
 import javax.xml.crypto.Data;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class SQLUserDAO implements UserDAO {
 
@@ -76,7 +74,24 @@ public class SQLUserDAO implements UserDAO {
 
     @Override
     public UserData getUser(String username) {
-        return null;
+        UserData user;
+        String queryString = "SELECT username, password, email FROM users WHERE username = ?";
+
+        try {
+            Connection connection = DatabaseManager.getConnection();
+            try (PreparedStatement query = connection.prepareStatement(queryString)) {
+                query.setString(1, username);
+                ResultSet result = query.executeQuery();
+                result.next();
+                user = new UserData(result.getString(1), result.getString(2), result.getString(3));
+                result.close();
+            }
+            connection.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return user;
     }
 
     @Override

@@ -17,7 +17,7 @@ class UserServiceTest {
 
     @BeforeEach
     public void init() {
-        userDAO = new MemoryUserDAO();
+        userDAO = new SQLUserDAO(); //MemoryUserDAO();
         userService = new UserService(userDAO);
     }
 
