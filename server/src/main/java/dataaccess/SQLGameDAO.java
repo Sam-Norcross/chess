@@ -120,13 +120,42 @@ public class SQLGameDAO implements GameDAO {
     }
 
     @Override
-    public void updateGame(int gameID, GameData gameData) {
+    public void updateGame(int gameID, GameData gameData) throws DataAccessException {
+        if (gameID >= nextGameID) {
+            throw new DataAccessException("Game with ID " + gameID + " does not exist");
+        }
 
+        String statementString = """
+                                    UPDATE games
+                                    SET whiteUsername = ?, blackUsername = ?, gameName = ?, game = ?
+                                    WHERE gameID = ?
+                                """;
+
+        try {
+            Connection connection = DatabaseManager.getConnection();
+            try (PreparedStatement statement = connection.prepareStatement(statementString)) {
+                Gson serializer = new Gson();
+
+                statement.setString(1, gameData.whiteUsername());
+                statement.setString(2, gameData.blackUsername());
+                statement.setString(3, gameData.gameName());
+                statement.setString(4, serializer.toJson(gameData.game()));
+                statement.setInt(5, gameData.gameID());
+                statement.executeUpdate();
+            }
+            connection.close();
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
     @Override
     public ArrayList<GameData> getGames() {
-        return null;
+        ArrayList<GameData> games = new ArrayList<>();
+        for (int i = 1; i < nextGameID; i++) {
+            games.add(getGame(i));
+        }
+        return games;
     }
 
 }
