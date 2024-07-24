@@ -39,8 +39,8 @@ public class SQLGameDAOTest {
         for (int i = 0; i < 15; i++) {
             name += name;
         }
-        final String NAME = name;
-        assertThrows(Exception.class, () -> gameDAO.createGame(NAME));
+        final String nameFinal = name;
+        assertThrows(Exception.class, () -> gameDAO.createGame(nameFinal));
     }
 
     @Test

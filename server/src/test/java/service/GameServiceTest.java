@@ -25,7 +25,6 @@ public class GameServiceTest {
     public void init() throws Exception {
 //        userDAO = new MemoryUserDAO();
 //        userService = new UserService(userDAO);
-//
 //        gameDAO = new MemoryGameDAO();
 //        gameService = new GameService(userDAO, gameDAO);
 
