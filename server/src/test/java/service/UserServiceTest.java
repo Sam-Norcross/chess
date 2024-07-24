@@ -40,7 +40,8 @@ class UserServiceTest {
 
     @Test
     public void registerInvalidUser() {
-        assertThrows(NullPointerException.class, () -> userService.register(new UserData("Bob", null, "bob@gmail.com")));
+        assertThrows(NullPointerException.class, () -> userService.register(
+                        new UserData("Bob", null, "bob@gmail.com")));
     }
 
     @Test
