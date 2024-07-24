@@ -40,7 +40,7 @@ public class UserService {
         if (userData == null) {
             throw new DataAccessException("Error: invalid request");
         } else {
-            if (!username.equals(userData.username()) || !userDAO.checkPassword(username, user.password())) {//!user.password().equals(userData.password())) {
+            if (!username.equals(userData.username()) || !userDAO.checkPassword(username, user.password())) {
                 throw new DataAccessException("Error: incorrect login info");
             } else {
                 String authToken = UUID.randomUUID().toString();
