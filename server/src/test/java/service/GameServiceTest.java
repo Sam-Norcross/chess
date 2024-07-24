@@ -22,12 +22,23 @@ public class GameServiceTest {
     private GameDAO gameDAO;
 
     @BeforeEach
-    public void init() {
-        userDAO = new MemoryUserDAO();
+    public void init() throws Exception {
+//        userDAO = new MemoryUserDAO();
+//        userService = new UserService(userDAO);
+//
+//        gameDAO = new MemoryGameDAO();
+//        gameService = new GameService(userDAO, gameDAO);
+
+
+        userDAO = new SQLUserDAO();
         userService = new UserService(userDAO);
 
-        gameDAO = new MemoryGameDAO();
+        gameDAO = new SQLGameDAO();
         gameService = new GameService(userDAO, gameDAO);
+
+        userDAO.clearUsers();
+        userDAO.clearAuth();
+        gameDAO.clearGames();
     }
 
     public String registerAndLogin(UserData user) throws DataAccessException { //Helper function to simplify tests

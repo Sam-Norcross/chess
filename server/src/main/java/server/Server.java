@@ -122,11 +122,14 @@ public class Server {
 
     private String createGame(Request req, Response res) {
         String resultJson;
+        Gson serializer = new Gson();
+
         String authToken = req.headers("Authorization");
-        String gameName = req.body();
+        String gameName = req.body().substring(13, req.body().length() - 2);    //Manually deserialize gameName from request body
+
         try {
             GameData gameData = gameService.createGame(authToken, gameName);
-            resultJson = "{ \"gameID\": " + gameData.gameID() + "}"; //new Gson().toJson(gameData.gameID());
+            resultJson = "{ \"gameID\": " + gameData.gameID() + "}";
         } catch (DataAccessException ex) {
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
             res.status(401);

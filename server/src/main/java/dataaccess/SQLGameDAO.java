@@ -45,6 +45,15 @@ public class SQLGameDAO implements GameDAO {
         }
 
         nextGameID = 1;
+        boolean exitFlag = false;
+        while (!exitFlag) {
+            if (getGame(nextGameID) == null) {
+                exitFlag = true;
+            } else {
+                nextGameID++;
+            }
+        }
+
     }
 
     @Override
@@ -70,6 +79,7 @@ public class SQLGameDAO implements GameDAO {
         } catch (Exception e) {
             throw new DataAccessException(e.getMessage());
         }
+
         return gameData;
     }
 
