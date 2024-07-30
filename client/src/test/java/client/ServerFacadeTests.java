@@ -99,13 +99,11 @@ public class ServerFacadeTests {
         for (int i = 0; i < 10; i++) {
             serverFacade.createGame(new CreateRequest(authToken, "Bob's game number " + i));
         }
+
         assertDoesNotThrow(() -> serverFacade.listGames(authToken));
-
-
         ArrayList<GameData> games = serverFacade.listGames(authToken);
-        for (GameData gameData : games) {
-            System.out.println(gameData);
-        }
+        assertEquals(10, games.size());
     }
+    
 
 }

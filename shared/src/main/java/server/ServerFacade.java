@@ -29,8 +29,9 @@ public class ServerFacade {
     }
 
     public ArrayList<GameData> listGames(String authToken) throws Exception {
-        ArrayList<GameData> games = new ArrayList<>();
-        return makeRequest("GET", "/game", authToken, ArrayList.class);
+        record ListGamesResponse(ArrayList<GameData> games) {}
+        ListGamesResponse response = makeRequest("GET", "/game", authToken, ListGamesResponse.class);
+        return response.games();
     }
 
     public GameData createGame(CreateRequest request) throws Exception {
