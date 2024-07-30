@@ -1,9 +1,12 @@
 package client;
 
+import dataaccess.DataAccessException;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
 import server.ServerFacade;
+
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -58,6 +61,23 @@ public class ServerFacadeTests {
         assertThrows(Exception.class, () -> serverFacade.login(userBob));
     }
 
+    @Test
+    public void logoutExistingUser() throws Exception {
+        serverFacade.register(userBob);
+        String authToken = serverFacade.login(userBob).authToken();
+        assertDoesNotThrow(() -> serverFacade.logout(authToken));
+    }
 
+    @Test
+    public void logoutBadAuth() throws Exception {
+        serverFacade.register(userBob);
+        serverFacade.login(userBob);
+        assertThrows(Exception.class, () -> serverFacade.logout(UUID.randomUUID().toString()));
+    }
+
+    @Test
+    public void createGame() throws Exception {
+
+    }
 
 }

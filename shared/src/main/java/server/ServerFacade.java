@@ -2,6 +2,7 @@ package server;
 
 import model.AuthData;
 import model.GameData;
+import model.JoinRequest;
 import model.UserData;
 
 import java.io.*;
@@ -26,20 +27,20 @@ public class ServerFacade {
         return makeRequest("POST", "/session", userData, AuthData.class);
     }
 
-    public void logout(UserData userData) throws Exception {
-        makeRequest("DELETE", "/session", userData, null);
+    public void logout(String authToken) throws Exception {
+        makeRequest("DELETE", "/session", authToken, null);
     }
 
-    public ArrayList<GameData> listGames(UserData userData) throws Exception {
-        return makeRequest("GET", "/game", userData, ArrayList.class);
+    public ArrayList<GameData> listGames(String authToken) throws Exception {
+        return makeRequest("GET", "/game", authToken, ArrayList.class);
     }
 
-    public GameData createGame(UserData userData) throws Exception {
-        return makeRequest("POST", "/game", userData, GameData.class);
+    public GameData createGame(String authToken) throws Exception { //TODO--also needs game name--add a CreateRequest model class
+        return makeRequest("POST", "/game", authToken, GameData.class);
     }
 
-    public void joinGame(UserData userData) throws Exception {
-        makeRequest("PUT", "/game", userData, null);
+    public void joinGame(JoinRequest request) throws Exception {    //TODO--update JoinRequest to also contain authToken, update references
+        makeRequest("PUT", "/game", request, null);
     }
 
     public void clear() throws Exception {
@@ -59,12 +60,14 @@ public class ServerFacade {
             return readBody(responseClass, http);
 
         } catch (Exception ex) {
-            throw new Exception("Error:" + ex.getMessage());
+            throw new Exception("Could not make request: " + ex.getMessage());
         }
     }
 
     private void writeBody(Object request, HttpURLConnection http) throws Exception {
-        if (request != null) {
+        if (request instanceof String) {
+            http.setRequestProperty("Authorization", (String) request);
+        } else if (request != null) {
             http.addRequestProperty("Content-Type", "application/json");
             String reqData = new Gson().toJson(request);
             try (OutputStream reqBody = http.getOutputStream()) {
@@ -89,7 +92,7 @@ public class ServerFacade {
     private void throwIfNotSuccessful(HttpURLConnection http) throws Exception {
         int status = http.getResponseCode();
         if (status != 200) {
-            throw new Exception("Error: response code was not 200");
+            throw new Exception("Response code was not 200");
         }
     }
 
