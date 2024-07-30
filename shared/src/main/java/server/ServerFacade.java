@@ -27,7 +27,7 @@ public class ServerFacade {
     }
 
     public void logout(UserData userData) throws Exception {
-        return makeRequest("DELETE", "/session", userData, null);
+        makeRequest("DELETE", "/session", userData, null);
     }
 
     public ArrayList<GameData> listGames(UserData userData) throws Exception {
@@ -39,11 +39,11 @@ public class ServerFacade {
     }
 
     public void joinGame(UserData userData) throws Exception {
-        return makeRequest("PUT", "/game", userData, null);
+        makeRequest("PUT", "/game", userData, null);
     }
 
-    public void clear(UserData userData) throws Exception {
-        return makeRequest("DELETE", "/db", userData, null);
+    public void clear() throws Exception {
+        makeRequest("DELETE", "/db", null, null);
     }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws Exception {
@@ -59,7 +59,7 @@ public class ServerFacade {
             return readBody(responseClass, http);
 
         } catch (Exception ex) {
-            throw new Exception("");
+            throw new Exception("Error");
         }
     }
 
@@ -84,6 +84,13 @@ public class ServerFacade {
             }
         }
         return response;
+    }
+
+    private void throwIfNotSuccessful(HttpURLConnection http) throws Exception {
+        int status = http.getResponseCode();
+        if (status != 200) {
+            throw new Exception("Error: response code was not 200");
+        }
     }
 
 }
