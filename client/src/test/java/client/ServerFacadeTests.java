@@ -1,11 +1,14 @@
 package client;
 
 import dataaccess.DataAccessException;
+import model.CreateRequest;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
 import server.ServerFacade;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -77,7 +80,32 @@ public class ServerFacadeTests {
 
     @Test
     public void createGame() throws Exception {
+        serverFacade.register(userBob);
+        String authToken = serverFacade.login(userBob).authToken();
+        assertDoesNotThrow(() -> serverFacade.createGame(new CreateRequest(authToken, "Bob's game")));
+    }
 
+    @Test
+    public void createGameBadAuth() throws Exception {
+        serverFacade.register(userBob);
+        serverFacade.login(userBob);
+        assertThrows(Exception.class, () -> serverFacade.createGame(new CreateRequest(UUID.randomUUID().toString(), "Bob's game")));
+    }
+
+    @Test
+    public void listMultiple() throws Exception {
+        serverFacade.register(userBob);
+        String authToken = serverFacade.login(userBob).authToken();
+        for (int i = 0; i < 10; i++) {
+            serverFacade.createGame(new CreateRequest(authToken, "Bob's game number " + i));
+        }
+        assertDoesNotThrow(() -> serverFacade.listGames(authToken));
+
+
+        ArrayList<GameData> games = serverFacade.listGames(authToken);
+        for (GameData gameData : games) {
+            System.out.println(gameData);
+        }
     }
 
 }

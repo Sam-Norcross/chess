@@ -23,13 +23,13 @@ public class GameService {
         return gameDAO.getGames();
     }
 
-    public GameData createGame(String authToken, String gameName) throws DataAccessException {
-        verifyAuth(authToken);
-        return gameDAO.createGame(gameName);
+    public GameData createGame(CreateRequest createRequest) throws DataAccessException {
+        verifyAuth(createRequest.authToken());
+        return gameDAO.createGame(createRequest.gameName());
     }
 
-    public GameData joinGame(String authToken, JoinRequest request) throws DataAccessException, IllegalArgumentException, NullPointerException {
-        verifyAuth(authToken);
+    public GameData joinGame(JoinRequest request) throws DataAccessException, IllegalArgumentException, NullPointerException {
+        verifyAuth(request.authToken());
 
         if (request == null || request.playerColor() == null) {
             throw new NullPointerException("Error: bad request");
@@ -41,7 +41,7 @@ public class GameService {
         }
 
         ChessGame.TeamColor color = request.playerColor();
-        String username = userDAO.getAuth(authToken).username();
+        String username = userDAO.getAuth(request.authToken()).username();
         String whiteUsername = gameData.whiteUsername();
         String blackUsername = gameData.blackUsername();
 

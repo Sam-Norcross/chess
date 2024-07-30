@@ -125,7 +125,7 @@ public class Server {
         String gameName = req.body().substring(13, req.body().length() - 2);    //Manually deserialize gameName from request body
 
         try {
-            GameData gameData = gameService.createGame(authToken, gameName);
+            GameData gameData = gameService.createGame(new CreateRequest(authToken, gameName));
             resultJson = "{ \"gameID\": " + gameData.gameID() + "}";
         } catch (DataAccessException ex) {
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
@@ -139,9 +139,10 @@ public class Server {
         String resultJson = "{}";
         String authToken = req.headers("Authorization");
         JoinRequest request = serializer.fromJson(req.body(), JoinRequest.class);
+        request = new JoinRequest(authToken, request.gameID(), request.playerColor());
 
         try {
-            gameService.joinGame(authToken, request);
+            gameService.joinGame(request);
         } catch (NullPointerException ex) {
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
             res.status(400);

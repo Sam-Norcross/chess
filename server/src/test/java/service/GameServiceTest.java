@@ -2,10 +2,7 @@ package service;
 
 import chess.ChessGame;
 import dataaccess.*;
-import model.AuthData;
-import model.GameData;
-import model.JoinRequest;
-import model.UserData;
+import model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -50,20 +47,20 @@ public class GameServiceTest {
     @Test
     public void createGame() throws DataAccessException {
         String authToken = registerAndLogin();
-        assertDoesNotThrow(() -> gameService.createGame(authToken, "Bob's game"));
+        assertDoesNotThrow(() -> gameService.createGame(new CreateRequest(authToken, "Bob's game")));
     }
 
     @Test
     public void createGameBadAuth() throws DataAccessException {
         registerAndLogin();
-        assertThrows(DataAccessException.class, () -> gameService.createGame(UUID.randomUUID().toString(), "Bob's game"));
+        assertThrows(DataAccessException.class, () -> gameService.createGame(new CreateRequest(UUID.randomUUID().toString(), "Bob's game")));
     }
 
     @Test
     public void listMultipleGames() throws DataAccessException {
         String authToken = registerAndLogin();
         for (int i = 0; i < 5; i++) {
-            gameService.createGame(authToken, UUID.randomUUID().toString());
+            gameService.createGame(new CreateRequest(authToken, UUID.randomUUID().toString()));
         }
         assertDoesNotThrow(() -> gameService.listGames(authToken));
         assertEquals(5, gameService.listGames(authToken).size());
@@ -74,7 +71,7 @@ public class GameServiceTest {
         String authToken = registerAndLogin();
         String badAuthToken = UUID.randomUUID().toString();
         for (int i = 0; i < 5; i++) {
-            gameService.createGame(authToken, UUID.randomUUID().toString());
+            gameService.createGame(new CreateRequest(authToken, UUID.randomUUID().toString()));
         }
         assertThrows(DataAccessException.class, () -> gameService.listGames(badAuthToken));
     }
@@ -82,9 +79,9 @@ public class GameServiceTest {
     @Test
     public void joinGame() throws DataAccessException {
         String authToken = registerAndLogin();
-        int gameID = gameService.createGame(authToken, "Bob's game").gameID();
+        int gameID = gameService.createGame(new CreateRequest(authToken, "Bob's game")).gameID();
 
-        assertDoesNotThrow(() -> gameService.joinGame(authToken, new JoinRequest(gameID, ChessGame.TeamColor.WHITE)));
+        assertDoesNotThrow(() -> gameService.joinGame(new JoinRequest(authToken, gameID, ChessGame.TeamColor.WHITE)));
         GameData game = gameDAO.getGame(gameID);
         assertEquals(game.whiteUsername(), "Bob");
 
@@ -95,13 +92,13 @@ public class GameServiceTest {
     public void joinGameColorTaken() throws DataAccessException {
         String authToken = registerAndLogin();
         String authToken2 = registerAndLogin(new UserData("Alice", "67890", "Alice@gmail.com"));
-        int gameID = gameService.createGame(authToken2, "Alice's game").gameID();
+        int gameID = gameService.createGame(new CreateRequest(authToken2, "Alice's game")).gameID();
 
         //Alice joins the game
-        gameService.joinGame(authToken2, new JoinRequest(gameID, ChessGame.TeamColor.WHITE));
+        gameService.joinGame(new JoinRequest(authToken2, gameID, ChessGame.TeamColor.WHITE));
 
         //Bob tries to join the game with the same color
-        assertThrows(IllegalArgumentException.class, () -> gameService.joinGame(authToken, new JoinRequest(gameID, ChessGame.TeamColor.WHITE)));
+        assertThrows(IllegalArgumentException.class, () -> gameService.joinGame(new JoinRequest(authToken, gameID, ChessGame.TeamColor.WHITE)));
         GameData game = gameDAO.getGame(gameID);
         assertEquals(game.whiteUsername(), "Alice");
     }
@@ -109,9 +106,9 @@ public class GameServiceTest {
     @Test
     public void joinGameBadID() throws DataAccessException {
         String authToken = registerAndLogin();
-        int gameID = gameService.createGame(authToken, "Bob's game").gameID() + 5;
+        int gameID = gameService.createGame(new CreateRequest(authToken, "Bob's game")).gameID() + 5;
 
-        assertThrows(NullPointerException.class, () -> gameService.joinGame(authToken, new JoinRequest(gameID, ChessGame.TeamColor.WHITE)));
+        assertThrows(NullPointerException.class, () -> gameService.joinGame(new JoinRequest(authToken, gameID, ChessGame.TeamColor.WHITE)));
 
     }
 }

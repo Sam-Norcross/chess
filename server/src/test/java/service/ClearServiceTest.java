@@ -2,6 +2,7 @@ package service;
 
 import dataaccess.*;
 import model.AuthData;
+import model.CreateRequest;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +48,7 @@ public class ClearServiceTest {
         UserData userData = new UserData("Bob", "12345", "bob@gmail.com");
         String authToken = registerAndLogin(userData);
 
-        gameService.createGame(authToken, UUID.randomUUID().toString());
+        gameService.createGame(new CreateRequest(authToken, UUID.randomUUID().toString()));
 
         assertDoesNotThrow(() -> clearService.clear());
         assertEquals(gameDAO.getGames().size(), 0);
@@ -60,7 +61,7 @@ public class ClearServiceTest {
         String authToken = registerAndLogin(userData);
 
         for (int i = 0; i < 100; i++) {
-            gameService.createGame(authToken, UUID.randomUUID().toString());
+            gameService.createGame(new CreateRequest(authToken, UUID.randomUUID().toString()));
         }
 
         assertDoesNotThrow(() -> clearService.clear());

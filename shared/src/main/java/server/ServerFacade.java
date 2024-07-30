@@ -1,9 +1,6 @@
 package server;
 
-import model.AuthData;
-import model.GameData;
-import model.JoinRequest;
-import model.UserData;
+import model.*;
 
 import java.io.*;
 import java.net.*;
@@ -32,14 +29,15 @@ public class ServerFacade {
     }
 
     public ArrayList<GameData> listGames(String authToken) throws Exception {
+        ArrayList<GameData> games = new ArrayList<>();
         return makeRequest("GET", "/game", authToken, ArrayList.class);
     }
 
-    public GameData createGame(String authToken) throws Exception { //TODO--also needs game name--add a CreateRequest model class
-        return makeRequest("POST", "/game", authToken, GameData.class);
+    public GameData createGame(CreateRequest request) throws Exception {
+        return makeRequest("POST", "/game", request, GameData.class);
     }
 
-    public void joinGame(JoinRequest request) throws Exception {    //TODO--update JoinRequest to also contain authToken, update references
+    public void joinGame(JoinRequest request) throws Exception {
         makeRequest("PUT", "/game", request, null);
     }
 
@@ -68,6 +66,15 @@ public class ServerFacade {
         if (request instanceof String) {
             http.setRequestProperty("Authorization", (String) request);
         } else if (request != null) {
+
+            if (request instanceof CreateRequest) {
+                CreateRequest createRequest = (CreateRequest) request;
+                http.setRequestProperty("Authorization", createRequest.authToken());
+            } else if (request instanceof JoinRequest) {
+                JoinRequest joinRequest = (JoinRequest) request;
+                http.setRequestProperty("Authorization", joinRequest.authToken());
+            }
+
             http.addRequestProperty("Content-Type", "application/json");
             String reqData = new Gson().toJson(request);
             try (OutputStream reqBody = http.getOutputStream()) {
