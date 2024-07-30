@@ -5,8 +5,9 @@ public class Main {
     public static void main(String[] args) {
         Server server = new Server();
         int port = server.run(0);
+        String url = "http://localhost:" + port;
         System.out.println("Server started!");
-        System.out.println("http://localhost:" + port);
 
+        new Repl(url).run();    //TODO--circular dependency added here
     }
 }
