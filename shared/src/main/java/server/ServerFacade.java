@@ -59,7 +59,7 @@ public class ServerFacade {
             return readBody(responseClass, http);
 
         } catch (Exception ex) {
-            throw new Exception("Error");
+            throw new Exception("Error:" + ex.getMessage());
         }
     }
 
