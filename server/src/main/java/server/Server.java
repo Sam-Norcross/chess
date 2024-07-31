@@ -122,7 +122,7 @@ public class Server {
         Gson serializer = new Gson();
 
         String authToken = req.headers("Authorization");
-        String gameName = req.body().substring(13, req.body().length() - 2);    //Manually deserialize gameName from request body
+        String gameName = serializer.fromJson(req.body(), CreateRequest.class).gameName();
 
         try {
             GameData gameData = gameService.createGame(new CreateRequest(authToken, gameName));
@@ -131,6 +131,7 @@ public class Server {
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
             res.status(401);
         }
+
         return resultJson;
     }
 

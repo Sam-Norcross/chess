@@ -45,8 +45,12 @@ public class Client {
             } else if (command.equals("create")) {
                 return createGame(tokens);
             } else if (command.equals("join")) {
-                serverFacade.joinGame(new JoinRequest(authToken, Integer.parseInt(tokens[1]),
-                                                        ChessGame.TeamColor.valueOf(tokens[2])));
+                return joinGame(tokens);
+
+                //TODO--add observe
+                //TODO--also make sure only pre-login commands can be accessed from pre-login,
+                //      and that only post-login commands can be accessed from post-login
+
             } else if (command.equals("quit")) {
                 return "quit";
             }
@@ -110,6 +114,11 @@ public class Client {
     public String listGames() throws Exception{
         try {
             ArrayList<GameData> games = serverFacade.listGames(authToken);
+
+            if (games.size() == 0) {
+                return "No games to list";
+            }
+
             String gamesString = "";
             for (GameData gameData : games) {
                 gamesString += gameData.toString() + "\n";
@@ -124,6 +133,17 @@ public class Client {
         try {
             int gameID = serverFacade.createGame(new CreateRequest(authToken, tokens[1])).gameID();
             return "Game successfully created with gameID " + gameID;
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    public String joinGame(String[] tokens) throws Exception{
+        try {
+            int gameID = Integer.parseInt(tokens[1]);
+            ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(tokens[2].toUpperCase());
+            serverFacade.joinGame(new JoinRequest(authToken, gameID, color));
+            return "Joined game " + gameID + " as " + color;
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
