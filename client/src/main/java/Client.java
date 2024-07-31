@@ -157,38 +157,42 @@ public class Client {
     }
 
     private String displayBoard(GameData gameData, ChessGame.TeamColor color) {
-        if (color == ChessGame.TeamColor.WHITE) {
-            return displayBoardWhite(gameData);
-        } else {
-            return displayBoardBlack(gameData);
-        }
-    }
-
-    //TODO--probably can combine white and black displays into one method
-    private String displayBoardWhite(GameData gameData) {
         ChessBoard board = gameData.game().getBoard();
 
         String setLabelColors = SET_BG_COLOR_LIGHT_GREY +  SET_TEXT_COLOR_BLACK;
         String resetColors = RESET_BG_COLOR + RESET_TEXT_COLOR;
         String SPACE = "  ";
         String PAD = " ";   //Half of a SPACE
-        String rowLabel = setLabelColors + SPACE + SPACE +
-                        "A" + SPACE + "B" + SPACE + "C" + SPACE + "D" + SPACE +
-                        "E" + SPACE + "F" + SPACE + "G" + SPACE + "H" + SPACE +
-                        SPACE + resetColors + "\n";
 
-        String boardString = "";
-        String currentColor = SET_BG_COLOR_WHITE;
-        for (int r = 8; r >= 1; r--) {
-            boardString += setLabelColors + PAD + r + PAD;
-            for (int c = 1; c <= 8; c++) {
-                currentColor = updateSquareColor(currentColor);
-                boardString += currentColor + SET_TEXT_COLOR_RED + getSymbol(board.getPiece(new ChessPosition(r, c)));
-            }
-            boardString += setLabelColors + PAD + r + PAD + resetColors + "\n";
-            currentColor = updateSquareColor(currentColor);
+        String rowLabel;
+        if (color == ChessGame.TeamColor.WHITE) {
+            rowLabel = setLabelColors + SPACE + SPACE +
+                    "A" + SPACE + "B" + SPACE + "C" + SPACE + "D" + SPACE +
+                    "E" + SPACE + "F" + SPACE + "G" + SPACE + "H" + SPACE +
+                    SPACE + resetColors + "\n";
+        } else {
+            rowLabel = setLabelColors + SPACE + SPACE +
+                    "H" + SPACE + "G" + SPACE + "F" + SPACE + "E" + SPACE +
+                    "D" + SPACE + "C" + SPACE + "B" + SPACE + "A" + SPACE +
+                    SPACE + resetColors + "\n";
         }
 
+        String boardString = "";
+        String currentColor = SET_BG_COLOR_BLACK;
+        for (int r = 8; r >= 1; r--) {
+            int currentRow = r;
+            if (color == ChessGame.TeamColor.BLACK) {
+                currentRow = 9 - r;
+            }
+
+            boardString += setLabelColors + PAD + currentRow + PAD;
+            for (int c = 1; c <= 8; c++) {
+                currentColor = updateSquareColor(currentColor);
+                boardString += currentColor + SET_TEXT_COLOR_RED + getSymbol(board.getPiece(new ChessPosition(currentRow, c)));
+            }
+            boardString += setLabelColors + PAD + currentRow + PAD + resetColors + "\n";
+            currentColor = updateSquareColor(currentColor);
+        }
 
         return rowLabel + boardString + rowLabel + resetColors;
     }
@@ -199,12 +203,6 @@ public class Client {
         } else {
             return SET_BG_COLOR_WHITE;
         }
-    }
-
-    private String displayBoardBlack(GameData gameData) {
-        ChessBoard board = gameData.game().getBoard();
-
-        return "";
     }
 
     private String getSymbol(ChessPiece piece) {
