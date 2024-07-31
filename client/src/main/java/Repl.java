@@ -14,6 +14,8 @@ public class Repl {
     public void run() {
         System.out.println("Starting REPL");
 
+//        System.out.println(SET_BG_COLOR_BLACK + SET_TEXT_COLOR_WHITE);
+
         Scanner scanner = new Scanner(System.in);
         System.out.print(prompt);
         String input = scanner.nextLine();

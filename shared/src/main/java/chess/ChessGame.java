@@ -428,8 +428,4 @@ public class ChessGame {
         return board;
     }
 
-    public String showBoard() {
-        return board.displayBoard();
-    }
-
 }

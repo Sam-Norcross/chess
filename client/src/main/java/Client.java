@@ -1,8 +1,13 @@
+import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import model.*;
 import server.ServerFacade;
 
 import java.util.ArrayList;
+
+import static ui.EscapeSequences.*;
 
 public class Client {
 
@@ -143,14 +148,103 @@ public class Client {
             ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(tokens[2].toUpperCase());
             GameData gameData = serverFacade.joinGame(new JoinRequest(authToken, gameID, color));
 
-            System.out.println("AAA");
-            System.out.println(gameData);
-            System.out.println(gameData.game().showBoard());
+            System.out.println(displayBoard(gameData, color));
 
             return "Joined game " + gameID + " as " + color;
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
+    }
+
+    private String displayBoard(GameData gameData, ChessGame.TeamColor color) {
+        if (color == ChessGame.TeamColor.WHITE) {
+            return displayBoardWhite(gameData);
+        } else {
+            return displayBoardBlack(gameData);
+        }
+    }
+
+    //TODO--probably can combine white and black displays into one method
+    private String displayBoardWhite(GameData gameData) {
+        ChessBoard board = gameData.game().getBoard();
+
+        String setLabelColors = SET_BG_COLOR_LIGHT_GREY +  SET_TEXT_COLOR_BLACK;
+        String resetColors = RESET_BG_COLOR + RESET_TEXT_COLOR;
+        String SPACE = "  ";
+        String PAD = " ";   //Half of a SPACE
+        String rowLabel = setLabelColors + SPACE + SPACE +
+                        "A" + SPACE + "B" + SPACE + "C" + SPACE + "D" + SPACE +
+                        "E" + SPACE + "F" + SPACE + "G" + SPACE + "H" + SPACE +
+                        SPACE + resetColors + "\n";
+
+        String boardString = "";
+        String currentColor = SET_BG_COLOR_WHITE;
+        for (int r = 8; r >= 1; r--) {
+            boardString += setLabelColors + PAD + r + PAD;
+            for (int c = 1; c <= 8; c++) {
+                currentColor = updateSquareColor(currentColor);
+                boardString += currentColor + SET_TEXT_COLOR_RED + getSymbol(board.getPiece(new ChessPosition(r, c)));
+            }
+            boardString += setLabelColors + PAD + r + PAD + resetColors + "\n";
+            currentColor = updateSquareColor(currentColor);
+        }
+
+
+        return rowLabel + boardString + rowLabel + resetColors;
+    }
+
+    private String updateSquareColor(String color) {
+        if (color.equals(SET_BG_COLOR_WHITE)) {
+            return SET_BG_COLOR_BLACK;
+        } else {
+            return SET_BG_COLOR_WHITE;
+        }
+    }
+
+    private String displayBoardBlack(GameData gameData) {
+        ChessBoard board = gameData.game().getBoard();
+
+        return "";
+    }
+
+    private String getSymbol(ChessPiece piece) {
+        if (piece == null) {
+            return EMPTY;
+        }
+
+        String symbol = EMPTY;
+        ChessPiece.PieceType type = piece.getPieceType();
+        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+            if (type == ChessPiece.PieceType.PAWN) {
+                symbol = WHITE_PAWN;
+            } else if (type == ChessPiece.PieceType.ROOK) {
+                symbol = WHITE_ROOK;
+            } else if (type == ChessPiece.PieceType.KNIGHT) {
+                symbol = WHITE_KNIGHT;
+            } else if (type == ChessPiece.PieceType.BISHOP) {
+                symbol = WHITE_BISHOP;
+            } else if (type == ChessPiece.PieceType.KING) {
+                symbol = WHITE_KING;
+            } else if (type == ChessPiece.PieceType.QUEEN) {
+                symbol = WHITE_QUEEN;
+            }
+        } else {
+            if (type == ChessPiece.PieceType.PAWN) {
+                symbol = BLACK_PAWN;
+            } else if (type == ChessPiece.PieceType.ROOK) {
+                symbol = BLACK_ROOK;
+            } else if (type == ChessPiece.PieceType.KNIGHT) {
+                symbol = BLACK_KNIGHT;
+            } else if (type == ChessPiece.PieceType.BISHOP) {
+                symbol = BLACK_BISHOP;
+            } else if (type == ChessPiece.PieceType.KING) {
+                symbol = BLACK_KING;
+            } else if (type == ChessPiece.PieceType.QUEEN) {
+                symbol = BLACK_QUEEN;
+            }
+        }
+
+        return symbol;
     }
 
 }
