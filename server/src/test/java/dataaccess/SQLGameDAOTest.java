@@ -57,6 +57,7 @@ public class SQLGameDAOTest {
         gameDAO.createGame("Bob's game");
         assertDoesNotThrow(() -> gameDAO.getGame(1));
         assertEquals("Bob's game", gameDAO.getGame(1).gameName());
+        assertNotNull(gameDAO.getGame(1).game());
     }
 
     @Test

@@ -84,6 +84,7 @@ public class GameServiceTest {
         assertDoesNotThrow(() -> gameService.joinGame(new JoinRequest(authToken, gameID, ChessGame.TeamColor.WHITE)));
         GameData game = gameDAO.getGame(gameID);
         assertEquals(game.whiteUsername(), "Bob");
+        assertNotNull(game.game());
 
         assertEquals(1, gameDAO.getGames().size());
     }

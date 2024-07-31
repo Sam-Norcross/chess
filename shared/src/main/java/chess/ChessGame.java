@@ -427,4 +427,9 @@ public class ChessGame {
     public ChessBoard getBoard() {
         return board;
     }
+
+    public String showBoard() {
+        return board.displayBoard();
+    }
+
 }

@@ -126,7 +126,7 @@ public class Server {
 
         try {
             GameData gameData = gameService.createGame(new CreateRequest(authToken, gameName));
-            resultJson = "{ \"gameID\": " + gameData.gameID() + "}";
+            resultJson = serializer.toJson(gameData);
         } catch (DataAccessException ex) {
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
             res.status(401);
@@ -143,7 +143,8 @@ public class Server {
         request = new JoinRequest(authToken, request.gameID(), request.playerColor());
 
         try {
-            gameService.joinGame(request);
+            GameData gameData = gameService.joinGame(request);
+            resultJson = serializer.toJson(gameData);
         } catch (NullPointerException ex) {
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
             res.status(400);
@@ -154,6 +155,7 @@ public class Server {
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
             res.status(401);
         }
+
         return resultJson;
     }
 

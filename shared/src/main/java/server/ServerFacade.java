@@ -38,8 +38,8 @@ public class ServerFacade {
         return makeRequest("POST", "/game", request, GameData.class);
     }
 
-    public void joinGame(JoinRequest request) throws Exception {
-        makeRequest("PUT", "/game", request, null);
+    public GameData joinGame(JoinRequest request) throws Exception {
+        return makeRequest("PUT", "/game", request, GameData.class);
     }
 
     public void clear() throws Exception {

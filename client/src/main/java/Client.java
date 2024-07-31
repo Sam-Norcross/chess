@@ -32,32 +32,33 @@ public class Client {
             String[] tokens = input.split(" ");
             String command = tokens[0];
 
-            if (command.equals("help")) {
-                return helpString();
-            } else if (command.equals("register")) {
+            if (command.equals("register") && authToken == null) {
                 return register(tokens);
-            } else if (command.equals("login")) {
+            } else if (command.equals("login") && authToken == null) {
                 return login(tokens);
-            } else if (command.equals("logout")) {
+            } else if (command.equals("logout") && authToken != null) {
                 return logout();
-            } else if (command.equals("list")) {
+            } else if (command.equals("list") && authToken != null) {
                 return listGames();
-            } else if (command.equals("create")) {
+            } else if (command.equals("create") && authToken != null) {
                 return createGame(tokens);
-            } else if (command.equals("join")) {
+            } else if (command.equals("join") && authToken != null) {
                 return joinGame(tokens);
+            } else if (command.equals("observe") && authToken != null) {
+                return "NO OBSERVE METHOD";//observe(tokens);
+
 
                 //TODO--add observe
-                //TODO--also make sure only pre-login commands can be accessed from pre-login,
-                //      and that only post-login commands can be accessed from post-login
+
 
             } else if (command.equals("quit")) {
                 return "quit";
+            } else {    //"help" and all unrecognized commands
+                return helpString();
             }
         } catch (Exception ex) {
             return ex.getMessage();
         }
-        return null;
     }
 
     private String helpString() {
@@ -67,8 +68,7 @@ public class Client {
                     register <USERNAME> <PASSWORD> <EMAIL> --register a new user
                     login <USERNAME> <PASSWORD> --login an existing user
                     quit --exit the application
-                    help --show possible commands
-                   """;
+                    help --show possible commands""";
         } else {
             return """
                    Possible commands:
@@ -78,8 +78,7 @@ public class Client {
                     observe <ID> --observe a game
                     logout --log the current user out
                     quit --exit the application
-                    help --show possible commands
-                   """;
+                    help --show possible commands""";
         }
     }
 
@@ -115,7 +114,7 @@ public class Client {
         try {
             ArrayList<GameData> games = serverFacade.listGames(authToken);
 
-            if (games.size() == 0) {
+            if (games.isEmpty()) {
                 return "No games to list";
             }
 
@@ -142,7 +141,12 @@ public class Client {
         try {
             int gameID = Integer.parseInt(tokens[1]);
             ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(tokens[2].toUpperCase());
-            serverFacade.joinGame(new JoinRequest(authToken, gameID, color));
+            GameData gameData = serverFacade.joinGame(new JoinRequest(authToken, gameID, color));
+
+            System.out.println("AAA");
+            System.out.println(gameData);
+            System.out.println(gameData.game().showBoard());
+
             return "Joined game " + gameID + " as " + color;
         } catch (Exception e) {
             throw new Exception(e.getMessage());

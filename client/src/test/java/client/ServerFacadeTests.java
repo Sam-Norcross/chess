@@ -88,6 +88,21 @@ public class ServerFacadeTests {
     }
 
     @Test
+    public void createGameNullTest() throws Exception {
+        serverFacade.register(userBob);
+        String authToken = serverFacade.login(userBob).authToken();
+        GameData gameData = serverFacade.createGame(new CreateRequest(authToken, "Bob's game"));
+        assertNotNull(gameData);
+        assertEquals(1, gameData.gameID());
+        assertNull(gameData.whiteUsername());
+        assertNull(gameData.blackUsername());
+        assertEquals("Bob's game", gameData.gameName());
+        assertNotNull(gameData.game());
+
+
+    }
+
+    @Test
     public void createGameBadAuth() throws Exception {
         serverFacade.register(userBob);
         serverFacade.login(userBob);
@@ -124,6 +139,8 @@ public class ServerFacadeTests {
         String authToken = serverFacade.login(userBob).authToken();
         serverFacade.createGame(new CreateRequest(authToken, "Bob's game"));
         assertDoesNotThrow(() -> serverFacade.joinGame(new JoinRequest(authToken, 1, ChessGame.TeamColor.WHITE)));
+        assertNotNull(serverFacade.joinGame(new JoinRequest(authToken, 1, ChessGame.TeamColor.BLACK)).game());
+
     }
 
     @Test

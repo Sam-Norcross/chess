@@ -149,4 +149,8 @@ public class ChessBoard {
         return result;
     }
 
+    public String displayBoard() {
+        return "displayBoard TEST";
+    }
+
 }
