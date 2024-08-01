@@ -23,16 +23,7 @@ public class Client {
         authToken = null;
         gameIDs = null;
 
-
-
-
-//        try { //TODO--testing only
-//            serverFacade.clear();
-//        } catch (Exception e) {
-//            throw new RuntimeException(e.getMessage());
-//        }
-
-
+        //Can use serverFacade.clear(); here in a try/catch for testing purposes
 
     }
 
@@ -193,11 +184,11 @@ public class Client {
         int gameID = Integer.parseInt(tokens[1]);
         int listedID = gameIDs.get(gameID);
 
-        //TODO--remove in phase 6
-        GameData PLACEHOLDER = new GameData(0, null, null,
+        //REMOVE IN PHASE 6
+        GameData placeholder = new GameData(0, null, null,
                                     "PLACEHOLDER", new ChessGame());
 
-        String boardString = displayBoard(PLACEHOLDER, ChessGame.TeamColor.WHITE);
+        String boardString = displayBoard(placeholder, ChessGame.TeamColor.WHITE);
         return "Observing game " + listedID + "\n" + boardString;
     }
 
@@ -206,20 +197,20 @@ public class Client {
 
         String setLabelColors = SET_BG_COLOR_LIGHT_GREY +  SET_TEXT_COLOR_BLACK;
         String resetColors = RESET_BG_COLOR + RESET_TEXT_COLOR;
-        String SPACE = "  ";
-        String PAD = " ";   //Half of a SPACE
+        String space = "  ";
+        String pad = " ";   //Half of a space
 
         String rowLabel;
         if (color == ChessGame.TeamColor.WHITE) {
-            rowLabel = setLabelColors + SPACE + SPACE +
-                    "A" + SPACE + "B" + SPACE + "C" + SPACE + "D" + SPACE +
-                    "E" + SPACE + "F" + SPACE + "G" + SPACE + "H" + SPACE +
-                    SPACE + resetColors + "\n";
+            rowLabel = setLabelColors + space + space +
+                    "A" + space + "B" + space + "C" + space + "D" + space +
+                    "E" + space + "F" + space + "G" + space + "H" + space +
+                    space + resetColors + "\n";
         } else {
-            rowLabel = setLabelColors + SPACE + SPACE +
-                    "H" + SPACE + "G" + SPACE + "F" + SPACE + "E" + SPACE +
-                    "D" + SPACE + "C" + SPACE + "B" + SPACE + "A" + SPACE +
-                    SPACE + resetColors + "\n";
+            rowLabel = setLabelColors + space + space +
+                    "H" + space + "G" + space + "F" + space + "E" + space +
+                    "D" + space + "C" + space + "B" + space + "A" + space +
+                    space + resetColors + "\n";
         }
 
         String boardString = "";
@@ -230,12 +221,12 @@ public class Client {
                 currentRow = 9 - r;
             }
 
-            boardString += setLabelColors + PAD + currentRow + PAD;
+            boardString += setLabelColors + pad + currentRow + pad;
             for (int c = 1; c <= 8; c++) {
                 currentColor = updateSquareColor(currentColor);
                 boardString += currentColor + SET_TEXT_COLOR_RED + getSymbol(board.getPiece(new ChessPosition(currentRow, c)));
             }
-            boardString += setLabelColors + PAD + currentRow + PAD + resetColors + "\n";
+            boardString += setLabelColors + pad + currentRow + pad + resetColors + "\n";
             currentColor = updateSquareColor(currentColor);
         }
 
