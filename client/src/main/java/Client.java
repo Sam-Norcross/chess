@@ -188,9 +188,16 @@ public class Client {
         }
     }
 
-    //TODO--add observe
     public String observeGame(String[] tokens) throws Exception{
-        return "NO OBSERVE METHOD";
+        int gameID = Integer.parseInt(tokens[1]);
+        int listedID = gameIDs.get(gameID);
+
+        //TODO--remove in phase 6
+        GameData PLACEHOLDER = new GameData(0, null, null,
+                                    "PLACEHOLDER", new ChessGame());
+
+        String boardString = displayBoard(PLACEHOLDER, ChessGame.TeamColor.WHITE);
+        return "Observing game " + listedID + "\n" + boardString;
     }
 
     private String displayBoard(GameData gameData, ChessGame.TeamColor color) {
