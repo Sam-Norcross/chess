@@ -6,6 +6,7 @@ import model.*;
 import server.ServerFacade;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import static ui.EscapeSequences.*;
 
@@ -13,11 +14,13 @@ public class Client {
 
     private final ServerFacade serverFacade;
     private String authToken;
+    private HashMap<Integer, Integer> gameIDs; //<list ID, gameID>
 
 
     public Client(String url) {
         serverFacade = new ServerFacade(url);
         authToken = null;
+        gameIDs = null;
 
 
 
@@ -40,7 +43,9 @@ public class Client {
             if (command.equals("register") && authToken == null) {
                 return register(tokens);
             } else if (command.equals("login") && authToken == null) {
-                return login(tokens);
+                String result = login(tokens);
+                gameIDsInit();
+                return result;
             } else if (command.equals("logout") && authToken != null) {
                 return logout();
             } else if (command.equals("list") && authToken != null) {
@@ -118,10 +123,6 @@ public class Client {
                 return "No games to list";
             }
 
-            //TODO--make the output look better (not just the gameData.toString())
-            //TODO--numbering should be independent of gameID, joinGame should also take this into account
-
-
             String gamesString = """
                                  Number\tGame Name\t\t\tWhite Username\t\tBlack Username
                                  ---------------------------------------------------------
@@ -129,28 +130,33 @@ public class Client {
 
             int i = 1;
             for (GameData gameData : games) {
-                String whiteUsername = gameData.whiteUsername();
-                String blackUsername = gameData.blackUsername();
-                if (whiteUsername == null) {
-                    whiteUsername = "None";
-                }
-                if (blackUsername == null) {
-                    blackUsername = "None";
-                }
+                if (gameData != null) {
+                    String whiteUsername = gameData.whiteUsername();
+                    String blackUsername = gameData.blackUsername();
+                    if (whiteUsername == null) {
+                        whiteUsername = "None";
+                    }
+                    if (blackUsername == null) {
+                        blackUsername = "None";
+                    }
 
-                String nameSpace = " ";
-                for (int r = 0; r < 19 - gameData.gameName().length(); r++) {
-                    nameSpace += " ";
-                }
+                    String nameSpace = " ";
+                    for (int r = 0; r < 19 - gameData.gameName().length(); r++) {
+                        nameSpace += " ";
+                    }
 
-                String wUsernameSpace = " ";
-                for (int r = 0; r < 19 - whiteUsername.length(); r++) {
-                    wUsernameSpace += " ";
-                }
+                    String wUsernameSpace = " ";
+                    for (int r = 0; r < 19 - whiteUsername.length(); r++) {
+                        wUsernameSpace += " ";
+                    }
 
-                gamesString += i++ + "\t\t" + gameData.gameName() + nameSpace + whiteUsername + wUsernameSpace
-                                + blackUsername + "\n";
+                    gamesString += i++ + "\t\t" + gameData.gameName() + nameSpace + whiteUsername + wUsernameSpace
+                            + blackUsername + "\n";
+                }
             }
+
+            gameIDsInit();
+
             return gamesString;
         } catch (Exception e) {
             throw new Exception(e.getMessage());
@@ -160,7 +166,7 @@ public class Client {
     public String createGame(String[] tokens) throws Exception{
         try {
             int gameID = serverFacade.createGame(new CreateRequest(authToken, tokens[1])).gameID();
-            return "Game successfully created with gameID " + gameID;
+            return "Game successfully created!";
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
@@ -170,11 +176,13 @@ public class Client {
         try {
             int gameID = Integer.parseInt(tokens[1]);
             ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(tokens[2].toUpperCase());
-            GameData gameData = serverFacade.joinGame(new JoinRequest(authToken, gameID, color));
+
+            int listedID = gameIDs.get(gameID);
+            GameData gameData = serverFacade.joinGame(new JoinRequest(authToken, listedID, color));
 
             System.out.println(displayBoard(gameData, color));
 
-            return "Joined game " + gameID + " as " + color;
+            return "Joined game " + listedID + " as " + color;
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
@@ -272,6 +280,18 @@ public class Client {
         }
 
         return symbol;
+    }
+
+    private void gameIDsInit() throws Exception {
+        ArrayList<GameData> games = serverFacade.listGames(authToken);
+        int i = 1;
+        gameIDs = new HashMap<>();
+        for (GameData gameData : games) {
+            if (gameData != null) {
+                gameIDs.put(i++, gameData.gameID());
+            }
+        }
+
     }
 
 }
