@@ -1,14 +1,12 @@
 package client;
 
 import chess.ChessGame;
-import dataaccess.DataAccessException;
 import model.CreateRequest;
 import model.GameData;
 import model.JoinRequest;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
-import server.ServerFacade;
 
 import java.util.ArrayList;
 import java.util.UUID;

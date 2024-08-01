@@ -1,6 +1,6 @@
-import java.util.Scanner;
+package client;
 
-import static ui.EscapeSequences.*;
+import java.util.Scanner;
 
 public class Repl {
 
