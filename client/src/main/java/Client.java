@@ -22,11 +22,11 @@ public class Client {
 
 
 
-        try { //TODO--testing only
-            serverFacade.clear();
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
+//        try { //TODO--testing only
+//            serverFacade.clear();
+//        } catch (Exception e) {
+//            throw new RuntimeException(e.getMessage());
+//        }
 
 
 
@@ -50,12 +50,7 @@ public class Client {
             } else if (command.equals("join") && authToken != null) {
                 return joinGame(tokens);
             } else if (command.equals("observe") && authToken != null) {
-                return "NO OBSERVE METHOD";//observe(tokens);
-
-
-                //TODO--add observe
-
-
+                return observeGame(tokens);//observe(tokens);
             } else if (command.equals("quit")) {
                 return "quit";
             } else {    //"help" and all unrecognized commands
@@ -123,9 +118,38 @@ public class Client {
                 return "No games to list";
             }
 
-            String gamesString = "";
+            //TODO--make the output look better (not just the gameData.toString())
+            //TODO--numbering should be independent of gameID, joinGame should also take this into account
+
+
+            String gamesString = """
+                                 Number\tGame Name\t\t\tWhite Username\t\tBlack Username
+                                 ---------------------------------------------------------
+                                 """;
+
+            int i = 1;
             for (GameData gameData : games) {
-                gamesString += gameData.toString() + "\n";
+                String whiteUsername = gameData.whiteUsername();
+                String blackUsername = gameData.blackUsername();
+                if (whiteUsername == null) {
+                    whiteUsername = "None";
+                }
+                if (blackUsername == null) {
+                    blackUsername = "None";
+                }
+
+                String nameSpace = " ";
+                for (int r = 0; r < 19 - gameData.gameName().length(); r++) {
+                    nameSpace += " ";
+                }
+
+                String wUsernameSpace = " ";
+                for (int r = 0; r < 19 - whiteUsername.length(); r++) {
+                    wUsernameSpace += " ";
+                }
+
+                gamesString += i++ + "\t\t" + gameData.gameName() + nameSpace + whiteUsername + wUsernameSpace
+                                + blackUsername + "\n";
             }
             return gamesString;
         } catch (Exception e) {
@@ -154,6 +178,11 @@ public class Client {
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
+    }
+
+    //TODO--add observe
+    public String observeGame(String[] tokens) throws Exception{
+        return "NO OBSERVE METHOD";
     }
 
     private String displayBoard(GameData gameData, ChessGame.TeamColor color) {
