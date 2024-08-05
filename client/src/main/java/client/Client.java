@@ -33,7 +33,8 @@ public class Client {
             String command = tokens[0];
 
             if (command.equals("register") && authToken == null) {
-                return register(tokens);
+                register(tokens);
+                return login(tokens);
             } else if (command.equals("login") && authToken == null) {
                 String result = login(tokens);
                 gameIDsInit();
@@ -47,7 +48,7 @@ public class Client {
             } else if (command.equals("join") && authToken != null) {
                 return joinGame(tokens);
             } else if (command.equals("observe") && authToken != null) {
-                return observeGame(tokens);//observe(tokens);
+                return observeGame(tokens);
             } else if (command.equals("quit")) {
                 return "quit";
             } else {    //"help" and all unrecognized commands
@@ -83,8 +84,10 @@ public class Client {
         try {
             serverFacade.register(new UserData(tokens[1], tokens[2], tokens[3]));
             return "Successfully registered user " + tokens[1];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new Exception("Error: a username, password, and email must all be provided");
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new Exception("Error registering user " + tokens[1]);
         }
     }
 
@@ -92,8 +95,10 @@ public class Client {
         try {
             authToken = serverFacade.login(new UserData(tokens[1], tokens[2], null)).authToken();
             return "Successfully logged in user " + tokens[1];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new Exception("Error: both a username and password must be provided");
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new Exception("Unrecognized login info");
         }
     }
 
@@ -103,7 +108,7 @@ public class Client {
             authToken = null;
             return "Successfully logged out!";
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new Exception("Error: unable to log out");
         }
     }
 
@@ -151,7 +156,7 @@ public class Client {
 
             return gamesString;
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new Exception("Error: unable to list games");
         }
     }
 
@@ -159,8 +164,10 @@ public class Client {
         try {
             int gameID = serverFacade.createGame(new CreateRequest(authToken, tokens[1])).gameID();
             return "Game successfully created!";
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new Exception("Error: a game name must be specified");
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new Exception("Error: unable to create game");
         }
     }
 
@@ -172,11 +179,11 @@ public class Client {
             int listedID = gameIDs.get(gameID);
             GameData gameData = serverFacade.joinGame(new JoinRequest(authToken, listedID, color));
 
-            System.out.println(displayBoard(gameData, color));
-
-            return "Joined game " + listedID + " as " + color;
+            return displayBoard(gameData, color) + "\nJoined game " + listedID + " as " + color;
+        }  catch (ArrayIndexOutOfBoundsException e) {
+            throw new Exception("Error: both a game number and player color must be provided");
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new Exception("Error: invalid request");
         }
     }
 
@@ -189,6 +196,7 @@ public class Client {
                                     "PLACEHOLDER", new ChessGame());
 
         String boardString = displayBoard(placeholder, ChessGame.TeamColor.WHITE);
+
         return "Observing game " + listedID + "\n" + boardString;
     }
 
@@ -211,6 +219,7 @@ public class Client {
                     "H" + space + "G" + space + "F" + space + "E" + space +
                     "D" + space + "C" + space + "B" + space + "A" + space +
                     space + resetColors + "\n";
+
         }
 
         String boardString = "";
@@ -223,8 +232,13 @@ public class Client {
 
             boardString += setLabelColors + pad + currentRow + pad;
             for (int c = 1; c <= 8; c++) {
+                int currentColumn = c;
+                if (color == ChessGame.TeamColor.BLACK) {
+                    currentColumn = 9 - c;
+                }
+
                 currentColor = updateSquareColor(currentColor);
-                boardString += currentColor + SET_TEXT_COLOR_RED + getSymbol(board.getPiece(new ChessPosition(currentRow, c)));
+                boardString += currentColor + SET_TEXT_COLOR_RED + getSymbol(board.getPiece(new ChessPosition(currentRow, currentColumn)));
             }
             boardString += setLabelColors + pad + currentRow + pad + resetColors + "\n";
             currentColor = updateSquareColor(currentColor);
