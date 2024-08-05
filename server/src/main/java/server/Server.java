@@ -6,6 +6,7 @@ import model.*;
 import service.*;
 import spark.*;
 import com.google.gson.Gson;
+import websocket.WebSocketHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +18,8 @@ public class Server {
     private final GameService gameService;
     private final ClearService clearService;
 
+    private final WebSocketHandler webSocketHandler;
+
     public Server() {
         UserDAO userDAO = new SQLUserDAO(); //MemoryUserDAO();
         GameDAO gameDAO = new SQLGameDAO(); //MemoryGameDAO();
@@ -24,12 +27,16 @@ public class Server {
         this.gameService = new GameService(userDAO, gameDAO);
         this.clearService = new ClearService(userDAO, gameDAO);
 
+        webSocketHandler = new WebSocketHandler();
+
     }
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+
+        Spark.webSocket("/ws", webSocketHandler);
 
         // Register your endpoints and handle exceptions here.
         Spark.post("/user", this::register);

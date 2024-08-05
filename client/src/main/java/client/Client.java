@@ -4,6 +4,8 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import client.websocket.NotificationHandler;
+import client.websocket.WebSocketFacade;
 import model.*;
 
 import java.util.ArrayList;
@@ -17,11 +19,18 @@ public class Client {
     private String authToken;
     private HashMap<Integer, Integer> gameIDs; //<list ID, gameID>
 
+    private String url;
+    private WebSocketFacade ws;
+    private NotificationHandler notificationHandler;
 
-    public Client(String url) {
+
+    public Client(String url, NotificationHandler notificationHandler) {
+        this.url = url;
         serverFacade = new ServerFacade(url);
         authToken = null;
         gameIDs = null;
+
+        this.notificationHandler = notificationHandler;
 
         //Can use serverFacade.clear(); here in a try/catch for testing purposes
 
@@ -94,6 +103,7 @@ public class Client {
     public String login(String[] tokens) throws Exception{
         try {
             authToken = serverFacade.login(new UserData(tokens[1], tokens[2], null)).authToken();
+            ws = new WebSocketFacade(url, notificationHandler);
             return "Successfully logged in user " + tokens[1];
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new Exception("Error: both a username and password must be provided");
