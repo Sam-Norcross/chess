@@ -16,6 +16,7 @@ import static ui.EscapeSequences.*;
 public class Client {
 
     private final ServerFacade serverFacade;
+    private String username;
     private String authToken;
     private HashMap<Integer, Integer> gameIDs; //<list ID, gameID>
 
@@ -27,6 +28,7 @@ public class Client {
     public Client(String url, NotificationHandler notificationHandler) {
         this.url = url;
         serverFacade = new ServerFacade(url);
+        username = null;
         authToken = null;
         gameIDs = null;
 
@@ -102,6 +104,7 @@ public class Client {
 
     public String login(String[] tokens) throws Exception{
         try {
+            username = tokens[1];
             authToken = serverFacade.login(new UserData(tokens[1], tokens[2], null)).authToken();
             ws = new WebSocketFacade(url, notificationHandler);
             return "Successfully logged in user " + tokens[1];
@@ -188,6 +191,10 @@ public class Client {
 
             int listedID = gameIDs.get(gameID);
             GameData gameData = serverFacade.joinGame(new JoinRequest(authToken, listedID, color));
+
+
+            ws.connect(username, authToken, gameID, color);
+
 
             return displayBoard(gameData, color) + "\nJoined game " + listedID + " as " + color;
         }  catch (ArrayIndexOutOfBoundsException e) {

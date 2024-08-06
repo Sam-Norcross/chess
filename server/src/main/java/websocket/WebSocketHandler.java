@@ -21,11 +21,12 @@ public class WebSocketHandler {
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws IOException {
-        UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
+        Gson serializer = new Gson();
+        UserGameCommand command = serializer.fromJson(message, UserGameCommand.class);
         UserGameCommand.CommandType type = command.getCommandType();
         if (type == CONNECT) {
-            ConnectCommand connectCommand = (ConnectCommand) command;
-            connect(connectCommand.getUsername(), connectCommand.getColor(), session);
+            ConnectCommand connectCommand = serializer.fromJson(message, ConnectCommand.class);
+            connect(connectCommand.getGameID(), connectCommand.getUsername(), connectCommand.getColor(), session);
         } else if (type == MAKE_MOVE) {
 
         } else if (type == LEAVE) {
@@ -35,18 +36,18 @@ public class WebSocketHandler {
         }
     }
 
-    private void connect(String username, ChessGame.TeamColor color, Session session) throws IOException {
-        connections.add(username, session);
+    private void connect(int gameID, String username, ChessGame.TeamColor color, Session session) throws IOException {
+        connections.add(gameID, session);
         String message;
         if (color == ChessGame.TeamColor.WHITE) {
-            message = username + "has joined the game as white.";
+            message = username + " has joined the game as white.";
         } else if (color == ChessGame.TeamColor.BLACK) {
-            message = username + "has joined the game as black.";
+            message = username + " has joined the game as black.";
         } else {
-            message = username + "has joined the game.";
+            message = username + " has joined the game.";
         }
         NotificationMessage notification = new NotificationMessage(NotificationMessage.NotificationType.PLAYER_CONNECT, message);
-        connections.broadcast(username, notification);
+        connections.broadcast(gameID, notification, session);
     }
 
 }

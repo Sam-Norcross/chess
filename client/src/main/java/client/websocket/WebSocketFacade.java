@@ -1,6 +1,9 @@
 package client.websocket;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
+import websocket.commands.ConnectCommand;
+import websocket.commands.UserGameCommand;
 import websocket.messages.NotificationMessage;
 
 import javax.websocket.*;
@@ -26,7 +29,6 @@ public class WebSocketFacade extends Endpoint {
                 @Override
                 public void onMessage(String message) {
                     NotificationMessage notification = new Gson().fromJson(message, NotificationMessage.class);
-                    //TODO--should this ^^^ be Notification instead of NotificationMessage?
                     notificationHandler.notify(notification);
                 }
             });
@@ -38,6 +40,13 @@ public class WebSocketFacade extends Endpoint {
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) { }
 
-
+    public void connect(String username, String authToken, int gameID, ChessGame.TeamColor color) throws Exception {
+        try {
+            ConnectCommand command = new ConnectCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID, username, color);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+        } catch (IOException ex) {
+            throw new Exception(ex.getMessage());
+        }
+    }
 
 }

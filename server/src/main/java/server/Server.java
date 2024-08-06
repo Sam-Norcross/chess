@@ -153,8 +153,6 @@ public class Server {
             GameData gameData = gameService.joinGame(request);
             resultJson = serializer.toJson(gameData);
 
-            webSocketHandler.connect();
-
         } catch (NullPointerException ex) {
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
             res.status(400);

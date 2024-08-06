@@ -29,5 +29,14 @@ public class ConnectCommand extends UserGameCommand {
         return color;
     }
 
+    @Override
+    public String toString() {
+        return super.toString() +
+                ", ConnectCommand{" +
+                "username='" + username + '\'' +
+                ", color=" + color +
+                '}';
+    }
+
 }
 

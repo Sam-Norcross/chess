@@ -33,7 +33,7 @@ public class Repl implements NotificationHandler  {
 
     @Override
     public void notify(NotificationMessage notification) {
-        System.out.println(SET_TEXT_COLOR_RED + notification);
+        System.out.println(SET_TEXT_COLOR_RED + notification.message());
         printPrompt();
     }
 
