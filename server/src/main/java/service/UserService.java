@@ -64,4 +64,8 @@ public class UserService {
         return userDAO.getAuth(authToken) != null;
     }
 
+    public AuthData getAuthData(String authToken) {
+        return userDAO.getAuth(authToken);
+    }
+
 }

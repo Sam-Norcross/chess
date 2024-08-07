@@ -3,6 +3,7 @@ package websocket;
 import chess.ChessGame;
 import chess.ChessMove;
 import com.google.gson.Gson;
+import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
@@ -40,6 +41,7 @@ public class WebSocketHandler {
         Gson serializer = new Gson();
         UserGameCommand command = serializer.fromJson(message, UserGameCommand.class);
         UserGameCommand.CommandType type = command.getCommandType();
+
         if (type == CONNECT) {
             ConnectCommand connectCommand = serializer.fromJson(message, ConnectCommand.class);
 
@@ -96,35 +98,47 @@ public class WebSocketHandler {
             }
         }
 
-        ChessGame.TeamColor color = game.getBoard().getPiece(move.getStartPosition()).getTeamColor();
-        String username = getUsername(gameData, color);
+        //Color of the piece being moved
+        ChessGame.TeamColor pieceColor = game.getBoard().getPiece(move.getStartPosition()).getTeamColor();
 
-        if (!validMove) {
-            connections.send(gameID, authToken, new ErrorMessage("Error: invalid move"));
-        } else if(game.getTeamTurn() != color) {
-            connections.send(gameID, authToken, new ErrorMessage("Error: it is not your turn"));
-        } else if (game.isGameOver(color)) {
+        String username = userService.getAuthData(authToken).username();
+        ChessGame.TeamColor userColor;
+        if (gameData.whiteUsername().equals(username)) {
+            userColor = ChessGame.TeamColor.WHITE;
+        } else if (gameData.blackUsername().equals(username)) {
+            userColor = ChessGame.TeamColor.BLACK;
+        } else {
+            userColor = null;
+        }
+
+        if (userColor == null) {
+            connections.send(gameID, authToken, new ErrorMessage("Error: cannot move as an observer"));
+        } else if (game.isGameOver(pieceColor)) {
             connections.send(gameID, authToken, new ErrorMessage("Error: this game is already over"));
+        } else if(game.getTeamTurn() != pieceColor || pieceColor != userColor) {
+            connections.send(gameID, authToken, new ErrorMessage("Error: it is not your turn"));
+        } else if (!validMove) {
+            connections.send(gameID, authToken, new ErrorMessage("Error: invalid move"));
         } else {
             game.makeMove(move);
             GameData updatedGameData = new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(),
                     gameData.gameName(), game);
             gameService.updateGame(gameID, updatedGameData);
 
-            loadGame(updatedGameData, color);
+            loadGame(updatedGameData, pieceColor);
             String message = username + " moved from " + move.getStartPosition().boardLocation() +
                     " to " + move.getEndPosition().boardLocation();
 
             connections.broadcast(gameID, new NotificationMessage(NotificationMessage.NotificationType.MADE_MOVE, message),
                     authToken);
 
-            if (updatedGameData.game().isInCheck(color)) {
+            if (updatedGameData.game().isInCheck(pieceColor)) {
                 connections.sendToAll(gameID, new NotificationMessage(NotificationMessage.NotificationType.CHECK,
                         username + " is in check"));
-            } else if (updatedGameData.game().isInCheckmate(color)) {
+            } else if (updatedGameData.game().isInCheckmate(pieceColor)) {
                 connections.sendToAll(gameID, new NotificationMessage(NotificationMessage.NotificationType.CHECKMATE,
                         username + " is in checkmate. " + username + " wins!"));
-            } else if (updatedGameData.game().isInStalemate(color)) {
+            } else if (updatedGameData.game().isInStalemate(pieceColor)) {
                 connections.sendToAll(gameID, new NotificationMessage(NotificationMessage.NotificationType.CHECK,
                         username + " is in stalemate. " + updatedGameData.gameName() + "ends in a tie!"));
             }

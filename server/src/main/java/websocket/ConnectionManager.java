@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
@@ -17,9 +18,6 @@ import websocket.messages.ServerMessage;
 public class ConnectionManager {
     public final ConcurrentHashMap<Integer, Set<Connection>> connections = new ConcurrentHashMap<>();
 
-//    public void add(int gameID, Set<Connection> connectionSet) {
-//        connections.put(gameID, connectionSet);
-//    }
 
     public void add(int gameID, Connection connection) {
         Set<Connection> connectionSet = connections.get(gameID);
@@ -32,6 +30,22 @@ public class ConnectionManager {
 
     public void remove(int gameID) {
         connections.remove(gameID);
+    }
+
+    public ChessGame.TeamColor getColor(int gameID, String authToken) {
+
+//        System.out.println("BBB");
+
+        Set<Connection> connectionSet = connections.get(gameID);
+        for (Connection connection : connectionSet) {
+
+//            System.out.println(connection);
+
+            if (connection.getAuthToken().equals(authToken)) {
+                return connection.getColor();
+            }
+        }
+        return null;
     }
 
     public void broadcast(int gameID, ServerMessage notification, Session exclude) throws IOException {

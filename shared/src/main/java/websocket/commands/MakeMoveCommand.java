@@ -14,4 +14,10 @@ public class MakeMoveCommand extends UserGameCommand {
         return move;
     }
 
+    @Override
+    public String toString() {
+        return "MakeMoveCommand{" +
+                "move=" + move +
+                "}," + super.toString();
+    }
 }
