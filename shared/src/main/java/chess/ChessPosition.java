@@ -56,4 +56,27 @@ public class ChessPosition {
     public String toString() {
         return "ChessPosition{" + "row=" + row + ", col=" + col + '}';
     }
+
+    public String boardLocation() {
+        String location = "";
+        if (col == 1) {
+            location = "a";
+        } else if (col == 2) {
+            location = "b";
+        } else if (col == 3) {
+            location = "c";
+        } else if (col == 4) {
+            location = "d";
+        } else if (col == 5) {
+            location = "e";
+        } else if (col == 6) {
+            location = "f";
+        } else if (col == 7) {
+            location = "g";
+        } else if (col == 8) {
+            location = "h";
+        }
+
+        return location + row;
+    }
 }

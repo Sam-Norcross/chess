@@ -16,8 +16,6 @@ public class Repl implements NotificationHandler  {
     }
 
     public void run() {
-        System.out.println("Starting REPL");
-
         Scanner scanner = new Scanner(System.in);
         printPrompt();
         String input = scanner.nextLine();
@@ -33,7 +31,7 @@ public class Repl implements NotificationHandler  {
 
     @Override
     public void notify(NotificationMessage notification) {
-        System.out.println(SET_TEXT_COLOR_RED + notification.message());
+        System.out.println("\n" + SET_TEXT_COLOR_RED + notification.getMessage());
         printPrompt();
     }
 

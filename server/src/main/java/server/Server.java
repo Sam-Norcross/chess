@@ -8,6 +8,7 @@ import spark.*;
 import com.google.gson.Gson;
 import websocket.WebSocketHandler;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -27,7 +28,7 @@ public class Server {
         this.gameService = new GameService(userDAO, gameDAO);
         this.clearService = new ClearService(userDAO, gameDAO);
 
-        webSocketHandler = new WebSocketHandler();
+        webSocketHandler = new WebSocketHandler(this.userService, this.gameService, this.clearService);
 
     }
 
@@ -153,6 +154,19 @@ public class Server {
             GameData gameData = gameService.joinGame(request);
             resultJson = serializer.toJson(gameData);
 
+
+
+            String username;
+            if (request.playerColor() == ChessGame.TeamColor.WHITE) {
+                username = gameData.whiteUsername();
+            } else {
+                username = gameData.blackUsername();
+            }
+
+            webSocketHandler.loadGame(gameData, username, request.playerColor());
+
+
+
         } catch (NullPointerException ex) {
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
             res.status(400);
@@ -162,7 +176,7 @@ public class Server {
         } catch (DataAccessException ex) {
             resultJson = "{ \"message\": \"" + ex.getMessage() + "\" }";
             res.status(401);
-        }
+        } catch (IOException ex) {}
 
         return resultJson;
     }

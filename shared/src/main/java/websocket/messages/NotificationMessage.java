@@ -1,6 +1,8 @@
 package websocket.messages;
 
-public record NotificationMessage(NotificationType type, String message) {
+
+
+public class NotificationMessage extends ServerMessage {
     public enum NotificationType {
         PLAYER_CONNECT,
         OBSERVER_CONNECT,
@@ -8,6 +10,24 @@ public record NotificationMessage(NotificationType type, String message) {
         LEFT_GAME,
         RESIGNED_GAME,
         CHECK,
-        CHECKMATE
+        CHECKMATE,
+        STALEMATE
+    }
+
+    NotificationType type;
+    String message;
+
+    public NotificationMessage(NotificationType type, String message) {
+        super(ServerMessage.ServerMessageType.NOTIFICATION);
+        this.type = type;
+        this.message = message;
+    }
+
+    public NotificationType getNotificationType() {
+        return type;
+    }
+
+    public String getMessage() {
+        return message;
     }
 }

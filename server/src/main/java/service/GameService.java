@@ -72,4 +72,16 @@ public class GameService {
         }
     }
 
+
+
+    //WebSocket auxiliary functions
+
+    public GameData getGame(int gameID) {
+        return gameDAO.getGame(gameID);
+    }
+
+    public void updateGame(int gameID, GameData gameData) throws DataAccessException {
+        gameDAO.updateGame(gameID, gameData);
+    }
+
 }
