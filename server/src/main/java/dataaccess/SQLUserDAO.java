@@ -106,7 +106,7 @@ public class SQLUserDAO implements UserDAO {
     }
 
     @Override
-    public AuthData getAuth(String authToken) throws DataAccessException {
+    public AuthData getAuth(String authToken) {
         AuthData auth;
         String queryString = "SELECT authToken, username FROM auth WHERE authToken = ?";
 

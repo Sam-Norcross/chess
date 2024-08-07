@@ -6,12 +6,12 @@ import org.eclipse.jetty.websocket.api.Session;
 import java.io.IOException;
 
 public class Connection {
-    public String username;
+    public String authToken;
     public Session session;
     public ChessGame.TeamColor color;
 
-    public Connection(String username, Session session, ChessGame.TeamColor color) {
-        this.username = username;
+    public Connection(String authToken, Session session, ChessGame.TeamColor color) {
+        this.authToken = authToken;
         this.session = session;
         if (color == null) {
             this.color = ChessGame.TeamColor.WHITE;
@@ -24,8 +24,12 @@ public class Connection {
         session.getRemote().sendString(msg);
     }
 
-    public String getUsername() {
-        return username;
+    public String getAuthToken() {
+        return authToken;
+    }
+
+    public boolean verifyAuth(String authToken) {
+        return this.authToken.equals(authToken);
     }
 
     public Session getSession() {
@@ -34,5 +38,13 @@ public class Connection {
 
     public ChessGame.TeamColor getColor() {
         return color;
+    }
+
+    @Override
+    public String toString() {
+        return "Connection{" +
+                "authToken='" + authToken + '\'' +
+                ", color=" + color +
+                '}';
     }
 }

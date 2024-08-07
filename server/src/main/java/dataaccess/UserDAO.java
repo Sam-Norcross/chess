@@ -14,7 +14,7 @@ public interface UserDAO {
 
     void createAuth(AuthData auth) throws DataAccessException;
 
-    AuthData getAuth(String authToken) throws DataAccessException;
+    AuthData getAuth(String authToken);
 
     void removeAuth(String authToken) throws DataAccessException;
 

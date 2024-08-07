@@ -42,7 +42,15 @@ public class WebSocketHandler {
         UserGameCommand.CommandType type = command.getCommandType();
         if (type == CONNECT) {
             ConnectCommand connectCommand = serializer.fromJson(message, ConnectCommand.class);
-            connect(connectCommand.getGameID(), connectCommand.getUsername(), connectCommand.getColor(), session);
+
+            int gameID = connectCommand.getGameID();
+            String username = connectCommand.getUsername();
+            String authToken = connectCommand.getAuthToken();
+
+            if (verifyAuthToken(authToken, session) && verifyGameID(gameID, session)) {
+                connect(gameID, username, authToken, connectCommand.getColor(), session);
+            }
+
         } else if (type == MAKE_MOVE) {
             MakeMoveCommand makeMoveCommand = serializer.fromJson(message, MakeMoveCommand.class);
 
@@ -58,8 +66,11 @@ public class WebSocketHandler {
 
     }
 
-    private void connect(int gameID, String username, ChessGame.TeamColor color, Session session) throws IOException {
-        connections.add(gameID, new Connection(username, session, color));
+    private void connect(int gameID, String username, String authToken, ChessGame.TeamColor color, Session session) throws IOException {
+        connections.add(gameID, new Connection(authToken, session, color));
+
+        loadGame(gameService.getGame(gameID), authToken, color);
+
         String message;
         if (color == ChessGame.TeamColor.WHITE) {
             message = username + " has joined the game as white.";
@@ -119,10 +130,10 @@ public class WebSocketHandler {
 
 
 
-    public void loadGame(GameData gameData, String username, ChessGame.TeamColor color) throws IOException {
+    public void loadGame(GameData gameData, String authToken, ChessGame.TeamColor color) throws IOException {
 //        connections.send(gameData.gameID(), username, new LoadGameMessage(gameData, color));
 
-        connections.sendLoadGame(gameData, username);
+        connections.sendLoadGame(gameData, authToken);
     }
 
     public void loadGame(GameData gameData, ChessGame.TeamColor color) throws IOException {
@@ -138,5 +149,31 @@ public class WebSocketHandler {
         }
         return username;
     }
+
+    private boolean verifyAuthToken(String authToken, Session session) throws IOException {
+        if (!userService.authTokenExists(authToken)) {
+            ErrorMessage errorMessage = new ErrorMessage("Error: invalid authToken");
+            String message = new Gson().toJson(errorMessage);
+            session.getRemote().sendString(message);
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private boolean verifyGameID(int gameID, Session session) throws IOException {
+        if (gameService.getGame(gameID) == null) {
+            ErrorMessage errorMessage = new ErrorMessage("Error: invalid game ID");
+            String message = new Gson().toJson(errorMessage);
+            session.getRemote().sendString(message);
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+//    private void sendError(int gameID, String authToken, String message) throws IOException {
+//        connections.send(gameID, authToken, new ErrorMessage(message));
+//    }
 
 }

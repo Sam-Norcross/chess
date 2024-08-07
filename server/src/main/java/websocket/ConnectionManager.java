@@ -44,10 +44,10 @@ public class ConnectionManager {
         }
     }
 
-    public void broadcast(int gameID, ServerMessage notification, String excludeUsername) throws IOException {
+    public void broadcast(int gameID, ServerMessage notification, String excludeAuthToken) throws IOException {
         for (var c : connections.get(gameID)) {
             if (c.getSession().isOpen()) {
-                if (!c.getUsername().equals(excludeUsername)) {
+                if (!c.verifyAuth(excludeAuthToken)) {
                     c.send(new Gson().toJson(notification));
                 }
             }
@@ -55,10 +55,10 @@ public class ConnectionManager {
     }
 
     //Send a ServerMessage to ONE client
-    public void send(int gameID, String username, ServerMessage message) throws IOException {
+    public void send(int gameID, String authToken, ServerMessage message) throws IOException {
         if (connections.containsKey(gameID)) {
             for (var c : connections.get(gameID)) {
-                if (c.getUsername().equals(username)) {
+                if (c.verifyAuth(authToken)) {
                     c.send(new Gson().toJson(message));
                 }
             }
@@ -73,11 +73,11 @@ public class ConnectionManager {
         }
     }
 
-    public void sendLoadGame(GameData gameData, String username) throws IOException {
+    public void sendLoadGame(GameData gameData, String authToken) throws IOException {
         int gameID = gameData.gameID();
         if (connections.containsKey(gameID)) {
             for (var c : connections.get(gameID)) {
-                if (c.getUsername().equals(username)) {
+                if (c.verifyAuth(authToken)) {
                     c.send(new Gson().toJson(new LoadGameMessage(gameData, c.getColor())));
                 }
             }

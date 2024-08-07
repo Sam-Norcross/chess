@@ -60,4 +60,8 @@ public class UserService {
         }
     }
 
+    public boolean authTokenExists(String authToken) {
+        return userDAO.getAuth(authToken) != null;
+    }
+
 }
