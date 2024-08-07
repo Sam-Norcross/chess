@@ -1,11 +1,13 @@
 package client;
 
 import client.websocket.NotificationHandler;
+import ui.PrintUtils;
 import websocket.messages.NotificationMessage;
 
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
+import static ui.PrintUtils.printPrompt;
 
 public class Repl implements NotificationHandler  {
 
@@ -35,8 +37,8 @@ public class Repl implements NotificationHandler  {
         printPrompt();
     }
 
-    private void printPrompt() {
-        System.out.print(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n>>> ");
-    }
+//    private void printPrompt() {
+//        System.out.print(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n>>> ");
+//    }
 
 }

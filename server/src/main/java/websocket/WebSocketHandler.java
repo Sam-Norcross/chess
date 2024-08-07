@@ -59,7 +59,7 @@ public class WebSocketHandler {
     }
 
     private void connect(int gameID, String username, ChessGame.TeamColor color, Session session) throws IOException {
-        connections.add(gameID, new Connection(username, session));
+        connections.add(gameID, new Connection(username, session, color));
         String message;
         if (color == ChessGame.TeamColor.WHITE) {
             message = username + " has joined the game as white.";
@@ -120,11 +120,15 @@ public class WebSocketHandler {
 
 
     public void loadGame(GameData gameData, String username, ChessGame.TeamColor color) throws IOException {
-        connections.send(gameData.gameID(), username, new LoadGameMessage(gameData, color));
+//        connections.send(gameData.gameID(), username, new LoadGameMessage(gameData, color));
+
+        connections.sendLoadGame(gameData, username);
     }
 
     public void loadGame(GameData gameData, ChessGame.TeamColor color) throws IOException {
-        connections.sendToAll(gameData.gameID(), new LoadGameMessage(gameData, color));
+//        connections.sendToAll(gameData.gameID(), new LoadGameMessage(gameData, color));
+
+        connections.sendLoadGameToAll(gameData);
     }
 
     private String getUsername(GameData gameData, ChessGame.TeamColor color) {

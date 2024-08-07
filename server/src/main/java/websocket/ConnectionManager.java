@@ -7,7 +7,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.gson.Gson;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
@@ -67,6 +69,26 @@ public class ConnectionManager {
         if (connections.containsKey(gameID)) {
             for (var c : connections.get(gameID)) {
                 c.send(new Gson().toJson(message));
+            }
+        }
+    }
+
+    public void sendLoadGame(GameData gameData, String username) throws IOException {
+        int gameID = gameData.gameID();
+        if (connections.containsKey(gameID)) {
+            for (var c : connections.get(gameID)) {
+                if (c.getUsername().equals(username)) {
+                    c.send(new Gson().toJson(new LoadGameMessage(gameData, c.getColor())));
+                }
+            }
+        }
+    }
+
+    public void sendLoadGameToAll(GameData gameData) throws IOException {
+        int gameID = gameData.gameID();
+        if (connections.containsKey(gameID)) {
+            for (var c : connections.get(gameID)) {
+                c.send(new Gson().toJson(new LoadGameMessage(gameData, c.getColor())));
             }
         }
     }
