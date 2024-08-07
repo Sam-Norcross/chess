@@ -47,10 +47,9 @@ public class WebSocketHandler {
             MakeMoveCommand makeMoveCommand = serializer.fromJson(message, MakeMoveCommand.class);
 
             try {
-
                 makeMove(makeMoveCommand.getGameID(), makeMoveCommand.getMove());
+            } catch (Exception e) {} //TODO--catch exception
 
-            } catch (Exception e) {}
         } else if (type == LEAVE) {
 
         } else if (type == RESIGN) {
@@ -98,6 +97,7 @@ public class WebSocketHandler {
             loadGame(updatedGameData, color);
             String message = username + " moved from " + move.getStartPosition().boardLocation() +
                     " to " + move.getEndPosition().boardLocation();
+
             connections.broadcast(gameID, new NotificationMessage(NotificationMessage.NotificationType.MADE_MOVE, message),
                     username);
 

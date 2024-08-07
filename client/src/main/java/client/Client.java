@@ -1,9 +1,6 @@
 package client;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import model.*;
@@ -72,6 +69,7 @@ public class Client {
             } else if (command.equals("leave") && authToken != null && currentGame != null) {
                 return leaveGame();
             } else if (command.equals("move") && authToken != null && currentGame != null) {
+                System.out.println("000");
                 return makeMove(tokens);
             } else if (command.equals("resign") && authToken != null && currentGame != null) {
                 return resign();
@@ -217,8 +215,15 @@ public class Client {
         return null;
     }
 
-    private String makeMove(String[] tokens) throws Exception{
-        return null;
+    private String makeMove(String[] tokens) throws Exception {
+        ChessPosition start = stringToPosition(tokens[1]);
+        ChessPosition end = stringToPosition(tokens[2]);
+
+        ChessMove move = new ChessMove(start, end);
+
+        ws.makeMove(authToken, currentGame.gameID(), move);
+
+        return "Move successful!";
     }
 
     private String resign() {

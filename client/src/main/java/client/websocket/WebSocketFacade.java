@@ -1,12 +1,10 @@
 package client.websocket;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import com.google.gson.Gson;
 import model.GameData;
 import websocket.commands.ConnectCommand;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
@@ -43,7 +41,9 @@ public class WebSocketFacade extends Endpoint {
 
                     if (messageType == ServerMessage.ServerMessageType.LOAD_GAME) {
 
-                        LoadGameMessage loadGameMessage = serializer.fromJson(message, LoadGameMessage.class);
+                        System.out.println("LOAD_GAME");
+
+                        LoadGameMessage loadGameMessage = serializer.fromJson(message, LoadGameMessage.class); //TODO--doesn't load based on player's color
                         printBoard(loadGameMessage.getGame(), loadGameMessage.getColor()); //TODO--better if this is in the client class
 
                     } else if (messageType == ServerMessage.ServerMessageType.ERROR) {
@@ -65,6 +65,15 @@ public class WebSocketFacade extends Endpoint {
     public void connect(String username, String authToken, int gameID, ChessGame.TeamColor color) throws Exception {
         try {
             ConnectCommand command = new ConnectCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID, username, color);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+        } catch (IOException ex) {
+            throw new Exception(ex.getMessage());
+        }
+    }
+
+    public void makeMove(String authToken, int gameID, ChessMove move) throws Exception {
+        try {
+            MakeMoveCommand command = new MakeMoveCommand(authToken, gameID, move);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (IOException ex) {
             throw new Exception(ex.getMessage());
