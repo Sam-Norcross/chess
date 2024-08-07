@@ -428,4 +428,8 @@ public class ChessGame {
         return board;
     }
 
+    public boolean isGameOver(TeamColor color) {
+        return isInCheckmate(color) || isInStalemate(color);
+    }
+
 }

@@ -55,7 +55,9 @@ public class WebSocketHandler {
             MakeMoveCommand makeMoveCommand = serializer.fromJson(message, MakeMoveCommand.class);
 
             try {
-                makeMove(makeMoveCommand.getGameID(), makeMoveCommand.getMove());
+                if (verifyAuthToken(makeMoveCommand.getAuthToken(), session)) {
+                    makeMove(makeMoveCommand.getGameID(), makeMoveCommand.getMove(), makeMoveCommand.getAuthToken());
+                }
             } catch (Exception e) {} //TODO--catch exception
 
         } else if (type == LEAVE) {
@@ -83,7 +85,7 @@ public class WebSocketHandler {
         connections.broadcast(gameID, notification, session);
     }
 
-    private void makeMove(int gameID, ChessMove move) throws Exception {
+    private void makeMove(int gameID, ChessMove move, String authToken) throws Exception {
         GameData gameData = gameService.getGame(gameID);
         ChessGame game = gameData.game();
         Collection<ChessMove> moves = game.validMoves(move.getStartPosition());
@@ -98,7 +100,11 @@ public class WebSocketHandler {
         String username = getUsername(gameData, color);
 
         if (!validMove) {
-            connections.send(gameID, username, new ErrorMessage("Error: invalid move"));
+            connections.send(gameID, authToken, new ErrorMessage("Error: invalid move"));
+        } else if(game.getTeamTurn() != color) {
+            connections.send(gameID, authToken, new ErrorMessage("Error: it is not your turn"));
+        } else if (game.isGameOver(color)) {
+            connections.send(gameID, authToken, new ErrorMessage("Error: this game is already over"));
         } else {
             game.makeMove(move);
             GameData updatedGameData = new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(),
@@ -110,7 +116,7 @@ public class WebSocketHandler {
                     " to " + move.getEndPosition().boardLocation();
 
             connections.broadcast(gameID, new NotificationMessage(NotificationMessage.NotificationType.MADE_MOVE, message),
-                    username);
+                    authToken);
 
             if (updatedGameData.game().isInCheck(color)) {
                 connections.sendToAll(gameID, new NotificationMessage(NotificationMessage.NotificationType.CHECK,
