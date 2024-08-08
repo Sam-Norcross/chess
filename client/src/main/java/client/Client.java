@@ -212,22 +212,17 @@ public class Client {
         } catch (Exception e) {
             throw new Exception("Error: invalid request");
         }
-
-
-//        int gameID = Integer.parseInt(tokens[1]);
-//        int listedID = gameIDs.get(gameID);
-//
-//        //REMOVE IN PHASE 6
-//        GameData placeholder = new GameData(0, null, null,
-//                                    "PLACEHOLDER", new ChessGame());
-//
-//        String boardString = "";//displayBoard(placeholder, ChessGame.TeamColor.WHITE);
-//
-//        return "Observing game " + listedID + "\n" + boardString;
     }
 
-    private String leaveGame() {
-        return null;
+    private String leaveGame() throws Exception {
+        try {
+            ws.leave(currentGame.gameID(), authToken);
+            currentGame = null;
+            playerColor = null;
+            return "You have sucessfully left the game!";
+        } catch (Exception e) {
+            throw new Exception("Error: invalid request");
+        }
     }
 
     private String makeMove(String[] tokens) throws Exception {
@@ -241,12 +236,6 @@ public class Client {
             } else {
                 move = new ChessMove(start, end);
             }
-
-//            if (currentGame.game().getBoard().getPiece(start) == null) {
-//                notificationHandler.handleError(new ErrorMessage("Error: " + tokens[1] + " is empty"));
-//            } else {
-//                ws.makeMove(authToken, currentGame.gameID(), move);
-//            }
 
             ws.makeMove(authToken, currentGame.gameID(), move);
 
