@@ -2,6 +2,7 @@ package client;
 
 import client.websocket.NotificationHandler;
 import ui.PrintUtils;
+import websocket.messages.ErrorMessage;
 import websocket.messages.NotificationMessage;
 
 import java.util.Scanner;
@@ -25,7 +26,11 @@ public class Repl implements NotificationHandler  {
 
             System.out.println(client.eval(input));
 
-            printPrompt();
+            String[] tokens = input.split(" ");
+            String command = tokens[0];
+            if (!command.equals("observe") && !command.equals("join")) {
+                printPrompt();
+            }
             input = scanner.nextLine();
         }
 
@@ -35,6 +40,10 @@ public class Repl implements NotificationHandler  {
     public void notify(NotificationMessage notification) {
         System.out.println("\n" + SET_TEXT_COLOR_RED + notification.getMessage());
         printPrompt();
+    }
+
+    public void handleError(ErrorMessage errorMessage) {
+        System.out.println("\n" + SET_TEXT_COLOR_RED + errorMessage.getMessage());
     }
 
 //    private void printPrompt() {

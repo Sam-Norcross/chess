@@ -95,60 +95,67 @@ public class WebSocketHandler {
     private void makeMove(int gameID, ChessMove move, String authToken) throws Exception {
         GameData gameData = gameService.getGame(gameID);
         ChessGame game = gameData.game();
-        Collection<ChessMove> moves = game.validMoves(move.getStartPosition());
-        boolean validMove = false;
-        for (ChessMove chessMove : moves) {
-            if (chessMove.equals(move)) {
-                validMove = true;
+
+        if (game.getBoard().getPiece(move.getStartPosition()) == null) {
+            connections.send(gameID, authToken, new ErrorMessage("Error: no piece selected"));
+        } else {
+
+            Collection<ChessMove> moves = game.validMoves(move.getStartPosition());
+            boolean validMove = false;
+            for (ChessMove chessMove : moves) {
+                if (chessMove.equals(move)) {
+                    validMove = true;
+                }
+            }
+
+
+            //Color of the piece being moved
+            ChessGame.TeamColor pieceColor = game.getBoard().getPiece(move.getStartPosition()).getTeamColor();
+
+            String username = userService.getAuthData(authToken).username();
+            ChessGame.TeamColor userColor;
+            if (gameData.whiteUsername().equals(username)) {
+                userColor = ChessGame.TeamColor.WHITE;
+            } else if (gameData.blackUsername().equals(username)) {
+                userColor = ChessGame.TeamColor.BLACK;
+            } else {
+                userColor = null;
+            }
+
+            if (userColor == null) {
+                connections.send(gameID, authToken, new ErrorMessage("Error: cannot move as an observer"));
+            } else if (game.isGameOver(pieceColor)) {
+                connections.send(gameID, authToken, new ErrorMessage("Error: this game is already over"));
+            } else if (game.getTeamTurn() != pieceColor || pieceColor != userColor) {
+                connections.send(gameID, authToken, new ErrorMessage("Error: it is not your turn"));
+            } else if (!validMove) {
+                connections.send(gameID, authToken, new ErrorMessage("Error: invalid move"));
+            } else {
+                game.makeMove(move);
+                GameData updatedGameData = new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(),
+                        gameData.gameName(), game);
+
+                gameService.updateGame(gameID, updatedGameData);
+
+                loadGame(updatedGameData, pieceColor);
+                String message = username + " moved from " + move.getStartPosition().boardLocation() +
+                        " to " + move.getEndPosition().boardLocation();
+
+                connections.broadcast(gameID, new NotificationMessage(NotificationMessage.NotificationType.MADE_MOVE, message),
+                        authToken);
+
+                if (updatedGameData.game().isInCheck(pieceColor)) {
+                    connections.sendToAll(gameID, new NotificationMessage(NotificationMessage.NotificationType.CHECK,
+                            username + " is in check"));
+                } else if (updatedGameData.game().isInCheckmate(pieceColor)) {
+                    connections.sendToAll(gameID, new NotificationMessage(NotificationMessage.NotificationType.CHECKMATE,
+                            username + " is in checkmate. " + username + " wins!"));
+                } else if (updatedGameData.game().isInStalemate(pieceColor)) {
+                    connections.sendToAll(gameID, new NotificationMessage(NotificationMessage.NotificationType.CHECK,
+                            username + " is in stalemate. " + updatedGameData.gameName() + "ends in a tie!"));
+                }
             }
         }
-
-        //Color of the piece being moved
-        ChessGame.TeamColor pieceColor = game.getBoard().getPiece(move.getStartPosition()).getTeamColor();
-
-        String username = userService.getAuthData(authToken).username();
-        ChessGame.TeamColor userColor;
-        if (gameData.whiteUsername().equals(username)) {
-            userColor = ChessGame.TeamColor.WHITE;
-        } else if (gameData.blackUsername().equals(username)) {
-            userColor = ChessGame.TeamColor.BLACK;
-        } else {
-            userColor = null;
-        }
-
-        if (userColor == null) {
-            connections.send(gameID, authToken, new ErrorMessage("Error: cannot move as an observer"));
-        } else if (game.isGameOver(pieceColor)) {
-            connections.send(gameID, authToken, new ErrorMessage("Error: this game is already over"));
-        } else if(game.getTeamTurn() != pieceColor || pieceColor != userColor) {
-            connections.send(gameID, authToken, new ErrorMessage("Error: it is not your turn"));
-        } else if (!validMove) {
-            connections.send(gameID, authToken, new ErrorMessage("Error: invalid move"));
-        } else {
-            game.makeMove(move);
-            GameData updatedGameData = new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(),
-                    gameData.gameName(), game);
-            gameService.updateGame(gameID, updatedGameData);
-
-            loadGame(updatedGameData, pieceColor);
-            String message = username + " moved from " + move.getStartPosition().boardLocation() +
-                    " to " + move.getEndPosition().boardLocation();
-
-            connections.broadcast(gameID, new NotificationMessage(NotificationMessage.NotificationType.MADE_MOVE, message),
-                    authToken);
-
-            if (updatedGameData.game().isInCheck(pieceColor)) {
-                connections.sendToAll(gameID, new NotificationMessage(NotificationMessage.NotificationType.CHECK,
-                        username + " is in check"));
-            } else if (updatedGameData.game().isInCheckmate(pieceColor)) {
-                connections.sendToAll(gameID, new NotificationMessage(NotificationMessage.NotificationType.CHECKMATE,
-                        username + " is in checkmate. " + username + " wins!"));
-            } else if (updatedGameData.game().isInStalemate(pieceColor)) {
-                connections.sendToAll(gameID, new NotificationMessage(NotificationMessage.NotificationType.CHECK,
-                        username + " is in stalemate. " + updatedGameData.gameName() + "ends in a tie!"));
-            }
-        }
-
     }
 
     private void leave(int gameID, String authToken) throws Exception {

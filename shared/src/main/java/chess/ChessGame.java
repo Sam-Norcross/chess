@@ -175,9 +175,10 @@ public class ChessGame {
             int diff = doubleMovedPawn.getColumn() - move.getStartPosition().getColumn();
             if (piece.getPieceType() == ChessPiece.PieceType.PAWN
                     && move.getStartPosition().getRow() == doubleMovedPawn.getRow()
-                    && diff == 1 || diff == -1) {
+                    && (diff == 1 || diff == -1)) {
                 board.removePiece(doubleMovedPawn);
             }
+
             //Reset doubleMovedPawn for the next turn
             doubleMovedPawn = null;
         }

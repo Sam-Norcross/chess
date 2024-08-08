@@ -13,6 +13,7 @@ public class PrintUtils {
 
     public static void printBoard(GameData gameData, ChessGame.TeamColor color) {
         System.out.println(displayBoard(gameData, color));
+        printPrompt();
     }
 
     public static String displayBoard(GameData gameData, ChessGame.TeamColor color) {

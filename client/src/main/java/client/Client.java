@@ -4,6 +4,7 @@ import chess.*;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import model.*;
+import websocket.messages.ErrorMessage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,8 +37,6 @@ public class Client {
         playerColor = null;
 
         this.notificationHandler = notificationHandler;
-
-        //Can use serverFacade.clear(); here in a try/catch for testing purposes
 
     }
 
@@ -167,7 +166,7 @@ public class Client {
 
     public String createGame(String[] tokens) throws Exception{
         try {
-            int gameID = serverFacade.createGame(new CreateRequest(authToken, tokens[1])).gameID();
+            serverFacade.createGame(new CreateRequest(authToken, tokens[1]));
             return "Game successfully created!";
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new Exception("Error: a game name must be specified");
@@ -183,11 +182,12 @@ public class Client {
 
             int gameID = gameIDs.get(listedID);
 
-            ws.connect(username, authToken, gameID, color);
-
             GameData gameData = serverFacade.joinGame(new JoinRequest(authToken, gameID, color));
             currentGame = gameData;
             playerColor = ChessGame.TeamColor.WHITE;
+
+            ws.connect(gameID, authToken);
+
 
             return "";//displayBoard(gameData, color) + "\nJoined game " + listedID + " as " + color;
             // TODO--^^^ replaced in WebSocketFacade
@@ -199,16 +199,31 @@ public class Client {
     }
 
     public String observeGame(String[] tokens) throws Exception{
-        int gameID = Integer.parseInt(tokens[1]);
-        int listedID = gameIDs.get(gameID);
+        try {
+            int listedID = Integer.parseInt(tokens[1]);
+            int gameID = gameIDs.get(listedID);
 
-        //REMOVE IN PHASE 6
-        GameData placeholder = new GameData(0, null, null,
-                                    "PLACEHOLDER", new ChessGame());
+            ws.connect(gameID, authToken);
 
-        String boardString = "";//displayBoard(placeholder, ChessGame.TeamColor.WHITE);
+            return "";//displayBoard(gameData, color) + "\nJoined game " + listedID + " as " + color;
+            // TODO--^^^ replaced in WebSocketFacade
+        }  catch (ArrayIndexOutOfBoundsException e) {
+            throw new Exception("Error: a game number must be specified");
+        } catch (Exception e) {
+            throw new Exception("Error: invalid request");
+        }
 
-        return "Observing game " + listedID + "\n" + boardString;
+
+//        int gameID = Integer.parseInt(tokens[1]);
+//        int listedID = gameIDs.get(gameID);
+//
+//        //REMOVE IN PHASE 6
+//        GameData placeholder = new GameData(0, null, null,
+//                                    "PLACEHOLDER", new ChessGame());
+//
+//        String boardString = "";//displayBoard(placeholder, ChessGame.TeamColor.WHITE);
+//
+//        return "Observing game " + listedID + "\n" + boardString;
     }
 
     private String leaveGame() {
@@ -216,19 +231,31 @@ public class Client {
     }
 
     private String makeMove(String[] tokens) throws Exception {
-        ChessPosition start = stringToPosition(tokens[1]);
-        ChessPosition end = stringToPosition(tokens[2]);
+        try {
+            ChessPosition start = stringToPosition(tokens[1]);
+            ChessPosition end = stringToPosition(tokens[2]);
 
-        ChessMove move;
-        if (tokens.length == 4) {
-            move = new ChessMove(start, end, ChessPiece.PieceType.valueOf(tokens[3]));
-        } else {
-            move = new ChessMove(start, end);
+            ChessMove move;
+            if (tokens.length == 4) {
+                move = new ChessMove(start, end, ChessPiece.PieceType.valueOf(tokens[3]));
+            } else {
+                move = new ChessMove(start, end);
+            }
+
+//            if (currentGame.game().getBoard().getPiece(start) == null) {
+//                notificationHandler.handleError(new ErrorMessage("Error: " + tokens[1] + " is empty"));
+//            } else {
+//                ws.makeMove(authToken, currentGame.gameID(), move);
+//            }
+
+            ws.makeMove(authToken, currentGame.gameID(), move);
+
+        } catch (ArrayIndexOutOfBoundsException | StringIndexOutOfBoundsException e) {
+            notificationHandler.handleError(new ErrorMessage("Error: both chess positions must be valid"));
         }
 
-        ws.makeMove(authToken, currentGame.gameID(), move);
+        return "";
 
-        return "Move successful!";
     }
 
     private String resign() {
@@ -239,28 +266,32 @@ public class Client {
         return null;
     }
 
-    private ChessPosition stringToPosition(String location) {
-        String col = location.toLowerCase().substring(0, 1);
-        int row = Integer.parseInt(location.substring(1, 2));
-        int column = 0;
-        if (col.equals("a")) {
-            column = 1;
-        } else if (col.equals("b")) {
-            column = 2;
-        } else if (col.equals("c")) {
-            column = 3;
-        } else if (col.equals("d")) {
-            column = 4;
-        } else if (col.equals("e")) {
-            column = 5;
-        } else if (col.equals("f")) {
-            column = 6;
-        } else if (col.equals("g")) {
-            column = 7;
-        } else if (col.equals("h")) {
-            column = 8;
+    private ChessPosition stringToPosition(String location) throws Exception {
+        try {
+            String col = location.toLowerCase().substring(0, 1);
+            int row = Integer.parseInt(location.substring(1, 2));
+            int column = 0;
+            if (col.equals("a")) {
+                column = 1;
+            } else if (col.equals("b")) {
+                column = 2;
+            } else if (col.equals("c")) {
+                column = 3;
+            } else if (col.equals("d")) {
+                column = 4;
+            } else if (col.equals("e")) {
+                column = 5;
+            } else if (col.equals("f")) {
+                column = 6;
+            } else if (col.equals("g")) {
+                column = 7;
+            } else if (col.equals("h")) {
+                column = 8;
+            }
+            return new ChessPosition(row, column);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new Exception("Error: invalid chess position");
         }
-        return new ChessPosition(row, column);
     }
 
     private String helpString() {
