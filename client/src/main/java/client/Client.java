@@ -11,6 +11,7 @@ import java.util.HashMap;
 
 import static ui.EscapeSequences.*;
 import static ui.PrintUtils.displayBoard;
+import static ui.PrintUtils.showMoves;
 
 public class Client {
 
@@ -71,7 +72,7 @@ public class Client {
             } else if (command.equals("resign") && authToken != null && currentGame != null) {
                 return resign();
             } else if (command.equals("show") && authToken != null && currentGame != null) {
-                return show();
+                return show(tokens);
             } else {    //"help" and all unrecognized commands
                 return helpString();
             }
@@ -253,7 +254,13 @@ public class Client {
         }
     }
 
-    private String show() {
+    private String show(String[] tokens) throws Exception {
+        try {
+            ChessPosition position = stringToPosition(tokens[1]);
+            return showMoves(currentGame, playerColor, currentGame.game().validMoves(position));
+        } catch (ArrayIndexOutOfBoundsException | StringIndexOutOfBoundsException e) {
+            notificationHandler.handleError(new ErrorMessage("Error: must include a valid chess position"));
+        }
         return null;
     }
 

@@ -1,10 +1,10 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import model.GameData;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 import static ui.EscapeSequences.*;
 import static ui.EscapeSequences.SET_TEXT_COLOR_RED;
@@ -58,6 +58,73 @@ public class PrintUtils {
             }
             boardString += setLabelColors + pad + currentRow + pad + resetColors + "\n";
             currentColor = updateSquareColor(currentColor);
+        }
+
+        return "\n" + rowLabel + boardString + rowLabel + resetColors;
+    }
+
+    public static String showMoves(GameData gameData, ChessGame.TeamColor color, Collection<ChessMove> moves) {
+        ChessBoard board = gameData.game().getBoard();
+
+        String setLabelColors = SET_BG_COLOR_LIGHT_GREY +  SET_TEXT_COLOR_BLACK;
+        String resetColors = RESET_BG_COLOR + RESET_TEXT_COLOR;
+        String space = "  ";
+        String pad = " ";   //Half of a space
+
+        String rowLabel;
+        if (color == ChessGame.TeamColor.WHITE) {
+            rowLabel = setLabelColors + space + space +
+                    "A" + space + "B" + space + "C" + space + "D" + space +
+                    "E" + space + "F" + space + "G" + space + "H" + space +
+                    space + resetColors + "\n";
+        } else {
+            rowLabel = setLabelColors + space + space +
+                    "H" + space + "G" + space + "F" + space + "E" + space +
+                    "D" + space + "C" + space + "B" + space + "A" + space +
+                    space + resetColors + "\n";
+
+        }
+
+        String boardString = "";
+        String currentColor = SET_BG_COLOR_BLACK;
+        for (int r = 8; r >= 1; r--) {
+            int currentRow = r;
+            if (color == ChessGame.TeamColor.BLACK) {
+                currentRow = 9 - r;
+            }
+
+            boardString += setLabelColors + pad + currentRow + pad;
+            for (int c = 1; c <= 8; c++) {
+                int currentColumn = c;
+                if (color == ChessGame.TeamColor.BLACK) {
+                    currentColumn = 9 - c;
+                }
+
+                boolean isValidMove = false;
+                for (ChessMove move : moves) {
+                    if (move.getEndPosition().equals(new ChessPosition(currentRow, currentColumn))) {
+                        isValidMove = true;
+                    }
+                }
+
+                String tempColor = "";
+                currentColor = updateSquareColor(currentColor);
+
+                if (isValidMove) {
+                    tempColor = currentColor;
+                    currentColor = SET_BG_COLOR_GREEN;
+                }
+
+                boardString += currentColor + SET_TEXT_COLOR_RED + getSymbol(board.getPiece(new ChessPosition(currentRow, currentColumn)));
+
+                if (isValidMove) {
+                    currentColor = tempColor;//updateSquareColor(currentColor);
+                }
+
+            }
+            boardString += setLabelColors + pad + currentRow + pad + resetColors + "\n";
+            currentColor = updateSquareColor(currentColor);
+
         }
 
         return "\n" + rowLabel + boardString + rowLabel + resetColors;
