@@ -13,11 +13,7 @@ public class Connection {
     public Connection(String authToken, Session session, ChessGame.TeamColor color) {
         this.authToken = authToken;
         this.session = session;
-        if (color == null) {
-            this.color = ChessGame.TeamColor.WHITE;
-        } else {
-            this.color = color;
-        }
+        this.color = color;
     }
 
     public void send(String msg) throws IOException {
@@ -38,6 +34,10 @@ public class Connection {
 
     public ChessGame.TeamColor getColor() {
         return color;
+    }
+
+    public boolean isObserver() {
+        return color == null;
     }
 
     @Override

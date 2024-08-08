@@ -3,6 +3,7 @@ package websocket;
 import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +32,16 @@ public class ConnectionManager {
 
     public void remove(int gameID) {
         connections.remove(gameID);
+    }
+
+    public Connection getConnection(int gameID, String authToken) {
+        Set<Connection> connectionSet = connections.get(gameID);
+        for (Connection connection : connectionSet) {
+            if (connection.getAuthToken().equals(authToken)) {
+                return connection;
+            }
+        }
+        return null;
     }
 
     public void removeFromGame(int gameID, String authToken) {
@@ -106,7 +117,9 @@ public class ConnectionManager {
         }
     }
 
-    //TODO--remove--testing only
+
+
+    //TODO--testing ONLY
     public ConcurrentHashMap<Integer, Set<Connection>> getConnections() {
         return connections;
     }

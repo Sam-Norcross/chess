@@ -5,6 +5,7 @@ import chess.ChessMove;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
+import org.eclipse.jetty.server.Authentication;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.api.Session;
@@ -43,16 +44,13 @@ public class WebSocketHandler {
         UserGameCommand.CommandType type = command.getCommandType();
 
         if (type == CONNECT) {
-            ConnectCommand connectCommand = serializer.fromJson(message, ConnectCommand.class);
-
-            System.out.println(connectCommand);
+            ConnectCommand connectCommand = serializer.fromJson(message, ConnectCommand.class); //TODO--unnecessary
 
             int gameID = connectCommand.getGameID();
-            String username = connectCommand.getUsername();
             String authToken = connectCommand.getAuthToken();
 
             if (verifyAuthToken(authToken, session) && verifyGameID(gameID, session)) {
-                connect(gameID, username, authToken, connectCommand.getColor(), session);
+                connect(gameID, authToken, session);
             }
 
         } else if (type == MAKE_MOVE) {
@@ -72,9 +70,18 @@ public class WebSocketHandler {
 
     }
 
-    private void connect(int gameID, String username, String authToken, ChessGame.TeamColor color, Session session) throws IOException {
-        connections.add(gameID, new Connection(authToken, session, color));
+    private void connect(int gameID, String authToken, Session session) throws IOException {
+        String username = userService.getAuthData(authToken).username();
+        GameData game = gameService.getGame(gameID);
+        ChessGame.TeamColor color = null;
 
+        if (game.whiteUsername() != null && game.whiteUsername().equals(username)) {
+            color = ChessGame.TeamColor.WHITE;
+        } else if (game.blackUsername() != null && game.blackUsername().equals(username)) {
+            color = ChessGame.TeamColor.BLACK;
+        }
+
+        connections.add(gameID, new Connection(authToken, session, color));
         loadGame(gameService.getGame(gameID), authToken, color);
 
         String message;
@@ -83,9 +90,10 @@ public class WebSocketHandler {
         } else if (color == ChessGame.TeamColor.BLACK) {
             message = username + " has joined the game as black.";
         } else {
-            message = username + " has joined the game.";
+            message = username + " is observing the game.";
         }
         NotificationMessage notification = new NotificationMessage(NotificationMessage.NotificationType.PLAYER_CONNECT, message);
+
         connections.broadcast(gameID, notification, session);
     }
 
@@ -158,21 +166,29 @@ public class WebSocketHandler {
     }
 
     private void resign(int gameID, String authToken) throws Exception {
-        String username = userService.getAuthData(authToken).username();
+        Connection connection = connections.getConnection(gameID, authToken);
+        if (connection.isObserver()) {
+            connections.send(gameID, authToken, new ErrorMessage("Error: observers cannot resign the game"));
+        } else {
 
-        GameData gameData = gameService.getGame(gameID);
-        ChessGame game = gameData.game();
-        game.markGameEnded();
-        gameService.updateGame(gameID, new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(),
-                                gameData.gameName(), game));
+            String username = userService.getAuthData(authToken).username();
 
-        connections.sendToAll(gameID, new NotificationMessage(NotificationMessage.NotificationType.RESIGNED_GAME,
-                username + " has resigned the game."));
+            GameData gameData = gameService.getGame(gameID);
+            ChessGame game = gameData.game();
+            game.markGameEnded();
+            gameService.updateGame(gameID, new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(),
+                    gameData.gameName(), game));
+
+            connections.sendToAll(gameID, new NotificationMessage(NotificationMessage.NotificationType.RESIGNED_GAME,
+                    username + " has resigned the game."));
+        }
 
     }
 
 
 
+
+    //Auxiliary function
 
     public void loadGame(GameData gameData, String authToken, ChessGame.TeamColor color) throws IOException {
         connections.sendLoadGame(gameData, authToken);
@@ -180,14 +196,6 @@ public class WebSocketHandler {
 
     public void loadGame(GameData gameData, ChessGame.TeamColor color) throws IOException {
         connections.sendLoadGameToAll(gameData);
-    }
-
-    private String getUsername(GameData gameData, ChessGame.TeamColor color) {
-        String username = gameData.whiteUsername();
-        if (color == ChessGame.TeamColor.BLACK) {
-            username = gameData.blackUsername();
-        }
-        return username;
     }
 
     private boolean verifyAuthToken(String authToken, Session session) throws IOException {
