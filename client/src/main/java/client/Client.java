@@ -15,7 +15,6 @@ import static ui.PrintUtils.displayBoard;
 public class Client {
 
     private final ServerFacade serverFacade;
-    private String username;
     private String authToken;
     private HashMap<Integer, Integer> gameIDs; //<list ID, gameID>
 
@@ -30,7 +29,6 @@ public class Client {
     public Client(String url, NotificationHandler notificationHandler) {
         this.url = url;
         serverFacade = new ServerFacade(url);
-        username = null;
         authToken = null;
         gameIDs = null;
         currentGame = null;
@@ -95,7 +93,6 @@ public class Client {
 
     public String login(String[] tokens) throws Exception{
         try {
-            username = tokens[1];
             authToken = serverFacade.login(new UserData(tokens[1], tokens[2], null)).authToken();
             ws = new WebSocketFacade(url, notificationHandler);
             return "Successfully logged in user " + tokens[1];
@@ -217,9 +214,8 @@ public class Client {
     private String leaveGame() throws Exception {
         try {
             ws.leave(currentGame.gameID(), authToken);
-            currentGame = null;
-            playerColor = null;
-            return "You have sucessfully left the game!";
+            removeGameData();
+            return "You have successfully left the game!";
         } catch (Exception e) {
             throw new Exception("Error: invalid request");
         }
@@ -247,12 +243,23 @@ public class Client {
 
     }
 
-    private String resign() {
-        return null;
+    private String resign() throws Exception {
+        try {
+            ws.resign(currentGame.gameID(), authToken);
+            removeGameData();
+            return "";
+        } catch (Exception e) {
+            throw new Exception("Error: invalid request");
+        }
     }
 
     private String show() {
         return null;
+    }
+
+    private void removeGameData() {
+        currentGame = null;
+        playerColor = null;
     }
 
     private ChessPosition stringToPosition(String location) throws Exception {

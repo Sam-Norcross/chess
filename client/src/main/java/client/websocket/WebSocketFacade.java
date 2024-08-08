@@ -40,7 +40,6 @@ public class WebSocketFacade extends Endpoint {
                     if (messageType == ServerMessage.ServerMessageType.LOAD_GAME) {
                         LoadGameMessage loadGameMessage = serializer.fromJson(message, LoadGameMessage.class); //TODO--doesn't load based on player's color
                         printBoard(loadGameMessage.getGame(), loadGameMessage.getColor()); //TODO--better if this is in the client class
-
                     } else if (messageType == ServerMessage.ServerMessageType.ERROR) {
                         ErrorMessage errorMessage = serializer.fromJson(message, ErrorMessage.class);
                         notificationHandler.handleError(errorMessage);
@@ -59,26 +58,23 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) { }
 
     public void connect(int gameID, String authToken) throws Exception {
-        try {
-            UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
-            this.session.getBasicRemote().sendText(new Gson().toJson(command));
-        } catch (IOException ex) {
-            throw new Exception(ex.getMessage());
-        }
+        sendCommand(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID));
     }
 
     public void makeMove(String authToken, int gameID, ChessMove move) throws Exception {
-        try {
-            MakeMoveCommand command = new MakeMoveCommand(authToken, gameID, move);
-            this.session.getBasicRemote().sendText(new Gson().toJson(command));
-        } catch (IOException ex) {
-            throw new Exception(ex.getMessage());
-        }
+        sendCommand(new MakeMoveCommand(authToken, gameID, move));
     }
 
     public void leave(int gameID, String authToken) throws Exception {
+        sendCommand(new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID));
+    }
+
+    public void resign(int gameID, String authToken) throws Exception {
+        sendCommand(new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID));
+    }
+
+    private void sendCommand(UserGameCommand command) throws Exception {
         try {
-            UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (IOException ex) {
             throw new Exception(ex.getMessage());
