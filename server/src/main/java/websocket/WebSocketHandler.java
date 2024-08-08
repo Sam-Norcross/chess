@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.server.Authentication;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.api.Session;
@@ -44,10 +45,8 @@ public class WebSocketHandler {
         UserGameCommand.CommandType type = command.getCommandType();
 
         if (type == CONNECT) {
-            ConnectCommand connectCommand = serializer.fromJson(message, ConnectCommand.class); //TODO--unnecessary
-
-            int gameID = connectCommand.getGameID();
-            String authToken = connectCommand.getAuthToken();
+            int gameID = command.getGameID();
+            String authToken = command.getAuthToken();
 
             if (verifyAuthToken(authToken, session) && verifyGameID(gameID, session)) {
                 connect(gameID, authToken, session);
@@ -55,19 +54,15 @@ public class WebSocketHandler {
 
         } else if (type == MAKE_MOVE) {
             MakeMoveCommand makeMoveCommand = serializer.fromJson(message, MakeMoveCommand.class);
-
-            try {
-                if (verifyAuthToken(makeMoveCommand.getAuthToken(), session)) {
-                    makeMove(makeMoveCommand.getGameID(), makeMoveCommand.getMove(), makeMoveCommand.getAuthToken());
-                }
-            } catch (Exception e) {} //TODO--catch exception
+            if (verifyAuthToken(makeMoveCommand.getAuthToken(), session)) {
+                makeMove(makeMoveCommand.getGameID(), makeMoveCommand.getMove(), makeMoveCommand.getAuthToken());
+            }
 
         } else if (type == LEAVE) {
             leave(command.getGameID(), command.getAuthToken());
         } else if (type == RESIGN) {
             resign(command.getGameID(), command.getAuthToken());
         }
-
     }
 
     private void connect(int gameID, String authToken, Session session) throws IOException {
@@ -169,6 +164,8 @@ public class WebSocketHandler {
         Connection connection = connections.getConnection(gameID, authToken);
         if (connection.isObserver()) {
             connections.send(gameID, authToken, new ErrorMessage("Error: observers cannot resign the game"));
+        } else if (gameService.getGame(gameID).game().isGameEnded()) {
+            connections.send(gameID, authToken, new ErrorMessage("Error: game is already resigned"));
         } else {
 
             String username = userService.getAuthData(authToken).username();

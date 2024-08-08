@@ -117,11 +117,4 @@ public class ConnectionManager {
         }
     }
 
-
-
-    //TODO--testing ONLY
-    public ConcurrentHashMap<Integer, Set<Connection>> getConnections() {
-        return connections;
-    }
-
 }

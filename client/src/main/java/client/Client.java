@@ -219,9 +219,12 @@ public class Client {
         ChessPosition start = stringToPosition(tokens[1]);
         ChessPosition end = stringToPosition(tokens[2]);
 
-        //TODO--add pawn promotion functionality--use tokens[3]
-
-        ChessMove move = new ChessMove(start, end);
+        ChessMove move;
+        if (tokens.length == 4) {
+            move = new ChessMove(start, end, ChessPiece.PieceType.valueOf(tokens[3]));
+        } else {
+            move = new ChessMove(start, end);
+        }
 
         ws.makeMove(authToken, currentGame.gameID(), move);
 
@@ -284,7 +287,7 @@ public class Client {
                         Possible commands:
                          redraw --redraws the chess board
                          leave --leave the current game
-                         move <START> <END> --move a piece
+                         move <START> <END> [PROMOTION TYPE] --move a piece
                          resign --forfeit the current game
                          show <PIECE> --shows possible moves""";
             }

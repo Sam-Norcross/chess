@@ -442,4 +442,7 @@ public class ChessGame {
         gameEnded = true;
     }
 
+    public boolean isGameEnded() {
+        return gameEnded;
+    }
 }
