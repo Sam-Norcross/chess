@@ -70,7 +70,6 @@ public class Client {
             } else if (command.equals("leave") && authToken != null && currentGame != null) {
                 return leaveGame();
             } else if (command.equals("move") && authToken != null && currentGame != null) {
-                System.out.println("000");
                 return makeMove(tokens);
             } else if (command.equals("resign") && authToken != null && currentGame != null) {
                 return resign();
@@ -219,6 +218,8 @@ public class Client {
     private String makeMove(String[] tokens) throws Exception {
         ChessPosition start = stringToPosition(tokens[1]);
         ChessPosition end = stringToPosition(tokens[2]);
+
+        //TODO--add pawn promotion functionality--use tokens[3]
 
         ChessMove move = new ChessMove(start, end);
 

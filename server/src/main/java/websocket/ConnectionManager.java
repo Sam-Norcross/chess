@@ -1,5 +1,6 @@
 package websocket;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -32,20 +33,18 @@ public class ConnectionManager {
         connections.remove(gameID);
     }
 
-    public ChessGame.TeamColor getColor(int gameID, String authToken) {
-
-//        System.out.println("BBB");
-
+    public void removeFromGame(int gameID, String authToken) {
         Set<Connection> connectionSet = connections.get(gameID);
-        for (Connection connection : connectionSet) {
-
-//            System.out.println(connection);
-
-            if (connection.getAuthToken().equals(authToken)) {
-                return connection.getColor();
+        Set<Connection> newConnections = new HashSet<>();
+        if (connectionSet != null) {
+            for (Connection connection : connectionSet) {
+                if (!connection.getAuthToken().equals(authToken)) {
+                    newConnections.add(connection);
+                }
             }
         }
-        return null;
+        connections.remove(gameID);
+        connections.put(gameID, newConnections);
     }
 
     public void broadcast(int gameID, ServerMessage notification, Session exclude) throws IOException {
@@ -105,6 +104,11 @@ public class ConnectionManager {
                 c.send(new Gson().toJson(new LoadGameMessage(gameData, c.getColor())));
             }
         }
+    }
+
+    //TODO--remove--testing only
+    public ConcurrentHashMap<Integer, Set<Connection>> getConnections() {
+        return connections;
     }
 
 }

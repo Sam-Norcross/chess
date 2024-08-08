@@ -84,4 +84,18 @@ public class GameService {
         gameDAO.updateGame(gameID, gameData);
     }
 
+    public void leaveGame(int gameID, String username) throws DataAccessException {
+        GameData game = gameDAO.getGame(gameID);
+        String whiteUsername = game.whiteUsername();
+        if (whiteUsername != null && whiteUsername.equals(username)) {
+            whiteUsername = null;
+        }
+        String blackUsername = game.blackUsername();
+        if (blackUsername != null && blackUsername.equals(username)) {
+            blackUsername = null;
+        }
+
+        gameDAO.updateGame(gameID, new GameData(gameID, whiteUsername, blackUsername, game.gameName(), game.game()));
+    }
+
 }

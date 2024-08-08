@@ -37,13 +37,15 @@ public class WebSocketHandler {
     }
 
     @OnWebSocketMessage
-    public void onMessage(Session session, String message) throws IOException {
+    public void onMessage(Session session, String message) throws Exception {
         Gson serializer = new Gson();
         UserGameCommand command = serializer.fromJson(message, UserGameCommand.class);
         UserGameCommand.CommandType type = command.getCommandType();
 
         if (type == CONNECT) {
             ConnectCommand connectCommand = serializer.fromJson(message, ConnectCommand.class);
+
+            System.out.println(connectCommand);
 
             int gameID = connectCommand.getGameID();
             String username = connectCommand.getUsername();
@@ -63,9 +65,9 @@ public class WebSocketHandler {
             } catch (Exception e) {} //TODO--catch exception
 
         } else if (type == LEAVE) {
-
+            leave(command.getGameID(), command.getAuthToken());
         } else if (type == RESIGN) {
-
+            resign(command.getGameID(), command.getAuthToken());
         }
 
     }
@@ -146,19 +148,37 @@ public class WebSocketHandler {
 
     }
 
+    private void leave(int gameID, String authToken) throws Exception {
+        String username = userService.getAuthData(authToken).username();
+        gameService.leaveGame(gameID, username);
+
+        connections.removeFromGame(gameID, authToken);
+        connections.sendToAll(gameID, new NotificationMessage(NotificationMessage.NotificationType.LEFT_GAME,
+                                username + " has left the game."));
+    }
+
+    private void resign(int gameID, String authToken) throws Exception {
+        String username = userService.getAuthData(authToken).username();
+
+        GameData gameData = gameService.getGame(gameID);
+        ChessGame game = gameData.game();
+        game.markGameEnded();
+        gameService.updateGame(gameID, new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(),
+                                gameData.gameName(), game));
+
+        connections.sendToAll(gameID, new NotificationMessage(NotificationMessage.NotificationType.RESIGNED_GAME,
+                username + " has resigned the game."));
+
+    }
 
 
 
 
     public void loadGame(GameData gameData, String authToken, ChessGame.TeamColor color) throws IOException {
-//        connections.send(gameData.gameID(), username, new LoadGameMessage(gameData, color));
-
         connections.sendLoadGame(gameData, authToken);
     }
 
     public void loadGame(GameData gameData, ChessGame.TeamColor color) throws IOException {
-//        connections.sendToAll(gameData.gameID(), new LoadGameMessage(gameData, color));
-
         connections.sendLoadGameToAll(gameData);
     }
 
@@ -191,9 +211,5 @@ public class WebSocketHandler {
             return true;
         }
     }
-
-//    private void sendError(int gameID, String authToken, String message) throws IOException {
-//        connections.send(gameID, authToken, new ErrorMessage(message));
-//    }
 
 }

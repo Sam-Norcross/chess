@@ -13,6 +13,7 @@ public class ChessGame {
 
     ChessBoard board;
     TeamColor turn;
+    boolean gameEnded;
 
     ChessPosition doubleMovedPawn;
 
@@ -27,6 +28,7 @@ public class ChessGame {
         board = new ChessBoard();
         board.resetBoard();
         turn  = TeamColor.WHITE;
+        gameEnded = false;
 
         doubleMovedPawn = null;
         wKingMoved = true;
@@ -429,7 +431,15 @@ public class ChessGame {
     }
 
     public boolean isGameOver(TeamColor color) {
-        return isInCheckmate(color) || isInStalemate(color);
+        if (gameEnded) {
+            return true;
+        } else {
+            return isInCheckmate(color) || isInStalemate(color);
+        }
+    }
+
+    public void markGameEnded() {
+        gameEnded = true;
     }
 
 }
