@@ -92,7 +92,9 @@ public class ConnectionManager {
     public void sendToAll(int gameID, ServerMessage message) throws IOException {
         if (connections.containsKey(gameID)) {
             for (var c : connections.get(gameID)) {
-                c.send(new Gson().toJson(message));
+                if (c.getSession().isOpen()) {
+                    c.send(new Gson().toJson(message));
+                }
             }
         }
     }
@@ -112,7 +114,9 @@ public class ConnectionManager {
         int gameID = gameData.gameID();
         if (connections.containsKey(gameID)) {
             for (var c : connections.get(gameID)) {
-                c.send(new Gson().toJson(new LoadGameMessage(gameData, c.getColor())));
+                if (c.getSession().isOpen()) {
+                    c.send(new Gson().toJson(new LoadGameMessage(gameData, c.getColor())));
+                }
             }
         }
     }
