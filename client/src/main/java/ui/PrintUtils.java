@@ -56,14 +56,7 @@ public class PrintUtils {
                     currentColumn = 9 - c;
                 }
 
-                boolean isValidMove = false;
-                if (moves != null) {
-                    for (ChessMove move : moves) {
-                        if (move.getEndPosition().equals(new ChessPosition(currentRow, currentColumn))) {
-                            isValidMove = true;
-                        }
-                    }
-                }
+                boolean isValidMove = isValidMove(moves, new ChessPosition(currentRow, currentColumn));
 
                 String tempColor = "";
                 currentColor = updateSquareColor(currentColor);
@@ -86,6 +79,17 @@ public class PrintUtils {
         }
 
         return "\n" + rowLabel + boardString + rowLabel + resetColors;
+    }
+
+    private static boolean isValidMove(Collection<ChessMove> moves, ChessPosition position) {
+        if (moves != null) {
+            for (ChessMove move : moves) {
+                if (move.getEndPosition().equals(position)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static String updateSquareColor(String color) {
