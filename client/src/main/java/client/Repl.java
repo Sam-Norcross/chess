@@ -46,8 +46,4 @@ public class Repl implements NotificationHandler  {
         System.out.println("\n" + SET_TEXT_COLOR_RED + errorMessage.getMessage());
     }
 
-//    private void printPrompt() {
-//        System.out.print(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n>>> ");
-//    }
-
 }

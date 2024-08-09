@@ -151,10 +151,13 @@ public class Server {
         request = new JoinRequest(authToken, request.gameID(), request.playerColor());
 
         try {
+            if (request.playerColor() == null) {
+                GameData gameData = gameService.getGame(request.gameID());
+                return serializer.toJson(gameData);
+            }
+
             GameData gameData = gameService.joinGame(request);
             resultJson = serializer.toJson(gameData);
-
-
 
             String username;
             if (request.playerColor() == ChessGame.TeamColor.WHITE) {

@@ -64,6 +64,7 @@ public class Client {
             } else if (command.equals("quit")) {
                 return "quit";
             } else if (command.equals("redraw") && authToken != null && currentGame != null) {
+                updateCurrentGame();
                 return displayBoard(currentGame, playerColor);
             } else if (command.equals("leave") && authToken != null && currentGame != null) {
                 return leaveGame();
@@ -180,15 +181,13 @@ public class Client {
 
             int gameID = gameIDs.get(listedID);
 
-            GameData gameData = serverFacade.joinGame(new JoinRequest(authToken, gameID, color));
-            currentGame = gameData;
-            playerColor = ChessGame.TeamColor.WHITE;
+            currentGame = serverFacade.joinGame(new JoinRequest(authToken, gameID, color));
+            playerColor = color;
 
             ws.connect(gameID, authToken);
 
 
-            return "";//displayBoard(gameData, color) + "\nJoined game " + listedID + " as " + color;
-            // TODO--^^^ replaced in WebSocketFacade
+            return "";
         }  catch (ArrayIndexOutOfBoundsException e) {
             throw new Exception("Error: both a game number and player color must be provided");
         } catch (Exception e) {
@@ -203,8 +202,7 @@ public class Client {
 
             ws.connect(gameID, authToken);
 
-            return "";//displayBoard(gameData, color) + "\nJoined game " + listedID + " as " + color;
-            // TODO--^^^ replaced in WebSocketFacade
+            return "";
         }  catch (ArrayIndexOutOfBoundsException e) {
             throw new Exception("Error: a game number must be specified");
         } catch (Exception e) {
@@ -234,7 +232,12 @@ public class Client {
                 move = new ChessMove(start, end);
             }
 
+            //Update to most current game for later display purposes
+            updateCurrentGame();
+
             ws.makeMove(authToken, currentGame.gameID(), move);
+
+            currentGame.game().makeMove(move);
 
         } catch (ArrayIndexOutOfBoundsException | StringIndexOutOfBoundsException e) {
             notificationHandler.handleError(new ErrorMessage("Error: both chess positions must be valid"));
@@ -256,6 +259,7 @@ public class Client {
 
     private String show(String[] tokens) throws Exception {
         try {
+            updateCurrentGame();
             ChessPosition position = stringToPosition(tokens[1]);
             return showMoves(currentGame, playerColor, currentGame.game().validMoves(position));
         } catch (ArrayIndexOutOfBoundsException | StringIndexOutOfBoundsException e) {
@@ -328,101 +332,6 @@ public class Client {
         }
     }
 
-//    private String displayBoard(GameData gameData, ChessGame.TeamColor color) {
-//        ChessBoard board = gameData.game().getBoard();
-//
-//        String setLabelColors = SET_BG_COLOR_LIGHT_GREY +  SET_TEXT_COLOR_BLACK;
-//        String resetColors = RESET_BG_COLOR + RESET_TEXT_COLOR;
-//        String space = "  ";
-//        String pad = " ";   //Half of a space
-//
-//        String rowLabel;
-//        if (color == ChessGame.TeamColor.WHITE) {
-//            rowLabel = setLabelColors + space + space +
-//                    "A" + space + "B" + space + "C" + space + "D" + space +
-//                    "E" + space + "F" + space + "G" + space + "H" + space +
-//                    space + resetColors + "\n";
-//        } else {
-//            rowLabel = setLabelColors + space + space +
-//                    "H" + space + "G" + space + "F" + space + "E" + space +
-//                    "D" + space + "C" + space + "B" + space + "A" + space +
-//                    space + resetColors + "\n";
-//
-//        }
-//
-//        String boardString = "";
-//        String currentColor = SET_BG_COLOR_BLACK;
-//        for (int r = 8; r >= 1; r--) {
-//            int currentRow = r;
-//            if (color == ChessGame.TeamColor.BLACK) {
-//                currentRow = 9 - r;
-//            }
-//
-//            boardString += setLabelColors + pad + currentRow + pad;
-//            for (int c = 1; c <= 8; c++) {
-//                int currentColumn = c;
-//                if (color == ChessGame.TeamColor.BLACK) {
-//                    currentColumn = 9 - c;
-//                }
-//
-//                currentColor = updateSquareColor(currentColor);
-//                boardString += currentColor + SET_TEXT_COLOR_RED + getSymbol(board.getPiece(new ChessPosition(currentRow, currentColumn)));
-//            }
-//            boardString += setLabelColors + pad + currentRow + pad + resetColors + "\n";
-//            currentColor = updateSquareColor(currentColor);
-//        }
-//
-//        return "\n" + rowLabel + boardString + rowLabel + resetColors;
-//    }
-
-//    private String updateSquareColor(String color) {
-//        if (color.equals(SET_BG_COLOR_WHITE)) {
-//            return SET_BG_COLOR_BLACK;
-//        } else {
-//            return SET_BG_COLOR_WHITE;
-//        }
-//    }
-//
-//    private String getSymbol(ChessPiece piece) {
-//        if (piece == null) {
-//            return EMPTY;
-//        }
-//
-//        String symbol = EMPTY;
-//        ChessPiece.PieceType type = piece.getPieceType();
-//        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-//            if (type == ChessPiece.PieceType.PAWN) {
-//                symbol = WHITE_PAWN;
-//            } else if (type == ChessPiece.PieceType.ROOK) {
-//                symbol = WHITE_ROOK;
-//            } else if (type == ChessPiece.PieceType.KNIGHT) {
-//                symbol = WHITE_KNIGHT;
-//            } else if (type == ChessPiece.PieceType.BISHOP) {
-//                symbol = WHITE_BISHOP;
-//            } else if (type == ChessPiece.PieceType.KING) {
-//                symbol = WHITE_KING;
-//            } else if (type == ChessPiece.PieceType.QUEEN) {
-//                symbol = WHITE_QUEEN;
-//            }
-//        } else {
-//            if (type == ChessPiece.PieceType.PAWN) {
-//                symbol = BLACK_PAWN;
-//            } else if (type == ChessPiece.PieceType.ROOK) {
-//                symbol = BLACK_ROOK;
-//            } else if (type == ChessPiece.PieceType.KNIGHT) {
-//                symbol = BLACK_KNIGHT;
-//            } else if (type == ChessPiece.PieceType.BISHOP) {
-//                symbol = BLACK_BISHOP;
-//            } else if (type == ChessPiece.PieceType.KING) {
-//                symbol = BLACK_KING;
-//            } else if (type == ChessPiece.PieceType.QUEEN) {
-//                symbol = BLACK_QUEEN;
-//            }
-//        }
-//
-//        return symbol;
-//    }
-
     private void gameIDsInit() throws Exception {
         ArrayList<GameData> games = serverFacade.listGames(authToken);
         int i = 1;
@@ -433,6 +342,10 @@ public class Client {
             }
         }
 
+    }
+
+    private void updateCurrentGame() throws Exception {
+        currentGame = serverFacade.joinGame(new JoinRequest(authToken, currentGame.gameID(), null));
     }
 
 }
