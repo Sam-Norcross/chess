@@ -28,7 +28,7 @@ public class PrintUtils {
         String pad = " ";   //Half of a space
 
         String rowLabel;
-        if (color == ChessGame.TeamColor.WHITE) {
+        if (color == ChessGame.TeamColor.WHITE || color == null) {
             rowLabel = setLabelColors + space + space +
                     "A" + space + "B" + space + "C" + space + "D" + space +
                     "E" + space + "F" + space + "G" + space + "H" + space +

@@ -114,9 +114,9 @@ public class WebSocketHandler {
 
             String username = userService.getAuthData(authToken).username();
             ChessGame.TeamColor userColor;
-            if (gameData.whiteUsername().equals(username)) {
+            if (gameData.whiteUsername() != null && gameData.whiteUsername().equals(username)) {
                 userColor = ChessGame.TeamColor.WHITE;
-            } else if (gameData.blackUsername().equals(username)) {
+            } else if (gameData.blackUsername() != null && gameData.blackUsername().equals(username)) {
                 userColor = ChessGame.TeamColor.BLACK;
             } else {
                 userColor = null;
@@ -136,10 +136,11 @@ public class WebSocketHandler {
                         gameData.gameName(), game);
 
                 gameService.updateGame(gameID, updatedGameData);
-
                 loadGame(updatedGameData, pieceColor);
+
                 String message = username + " moved from " + move.getStartPosition().boardLocation() +
                         " to " + move.getEndPosition().boardLocation();
+
 
                 connections.broadcast(gameID, new NotificationMessage(NotificationMessage.NotificationType.MADE_MOVE, message),
                         authToken);

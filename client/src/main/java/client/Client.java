@@ -26,6 +26,8 @@ public class Client {
     private WebSocketFacade ws;
     private NotificationHandler notificationHandler;
 
+    private ClientGameDatabase gameDatabase;
+
 
     public Client(String url, NotificationHandler notificationHandler) {
         this.url = url;
@@ -36,6 +38,8 @@ public class Client {
         playerColor = null;
 
         this.notificationHandler = notificationHandler;
+
+        gameDatabase = new ClientGameDatabase(null);
 
     }
 
@@ -65,7 +69,11 @@ public class Client {
                 return "quit";
             } else if (command.equals("redraw") && authToken != null && currentGame != null) {
                 updateCurrentGame();
-                return displayBoard(currentGame, playerColor);
+                if (playerColor != null) {
+                    return displayBoard(currentGame, playerColor);
+                } else {
+                    return displayBoard(currentGame, ChessGame.TeamColor.WHITE);
+                }
             } else if (command.equals("leave") && authToken != null && currentGame != null) {
                 return leaveGame();
             } else if (command.equals("move") && authToken != null && currentGame != null) {
@@ -97,7 +105,7 @@ public class Client {
     public String login(String[] tokens) throws Exception{
         try {
             authToken = serverFacade.login(new UserData(tokens[1], tokens[2], null)).authToken();
-            ws = new WebSocketFacade(url, notificationHandler);
+            ws = new WebSocketFacade(url, notificationHandler, gameDatabase);
             return "Successfully logged in user " + tokens[1];
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new Exception("Error: both a username and password must be provided");
@@ -183,6 +191,7 @@ public class Client {
             int gameID = gameIDs.get(listedID);
 
             currentGame = serverFacade.joinGame(new JoinRequest(authToken, gameID, color));
+            gameDatabase.updateCurrentGame(currentGame);
             playerColor = color;
 
             ws.connect(gameID, authToken);
@@ -202,6 +211,10 @@ public class Client {
             int gameID = gameIDs.get(listedID);
 
             ws.connect(gameID, authToken);
+
+            while (currentGame == null || currentGame.gameID() != gameID) {
+                currentGame = gameDatabase.getCurrentGame();
+            }
 
             return "";
         }  catch (ArrayIndexOutOfBoundsException e) {
@@ -223,6 +236,9 @@ public class Client {
 
     private String makeMove(String[] tokens) throws Exception {
         try {
+            if (playerColor == null) {
+                throw new Exception("Error: cannot move as an observer");
+            }
             ChessPosition start = stringToPosition(tokens[1]);
             ChessPosition end = stringToPosition(tokens[2]);
 
@@ -238,8 +254,11 @@ public class Client {
 
             if (!currentGame.game().isGameOver(ChessGame.TeamColor.WHITE) &&
                     !currentGame.game().isGameOver(ChessGame.TeamColor.BLACK)) {
+
                 ws.makeMove(authToken, currentGame.gameID(), move);
                 currentGame.game().makeMove(move);
+                gameDatabase.updateCurrentGame(currentGame);
+
             } else {
                 throw new Exception("Error: the game is over");
             }
@@ -277,6 +296,11 @@ public class Client {
                     throw new Exception("Error: no piece selected");
                 }
 
+                ChessGame.TeamColor pieceColor = currentGame.game().getBoard().getPiece(position).getTeamColor();
+                if (currentGame.game().getTeamTurn() != pieceColor) {
+                    throw new Exception("Error: it is not " + pieceColor.name().toLowerCase() + "'s turn.");
+                }
+
                 return showMoves(currentGame, playerColor, currentGame.game().validMoves(position));
             } else {
                 throw new Exception("Error: the game is over");
@@ -292,6 +316,8 @@ public class Client {
     private void removeGameData() {
         currentGame = null;
         playerColor = null;
+
+        gameDatabase.updateCurrentGame(null);
     }
 
     private ChessPosition stringToPosition(String location) throws Exception {
@@ -366,7 +392,8 @@ public class Client {
     }
 
     private void updateCurrentGame() throws Exception {
-        currentGame = serverFacade.joinGame(new JoinRequest(authToken, currentGame.gameID(), null));
+        currentGame = gameDatabase.getCurrentGame();
+
     }
 
 }

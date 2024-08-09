@@ -1,6 +1,7 @@
 package client.websocket;
 
 import chess.*;
+import client.ClientGameDatabase;
 import com.google.gson.Gson;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
@@ -20,8 +21,12 @@ public class WebSocketFacade extends Endpoint {
     private Session session;
     private NotificationHandler notificationHandler;
 
-    public WebSocketFacade(String url, NotificationHandler notificationHandler) throws Exception {
+    private ClientGameDatabase gameDatabase;
+
+    public WebSocketFacade(String url, NotificationHandler notificationHandler, ClientGameDatabase gameDatabase) throws Exception {
         try {
+            this.gameDatabase = gameDatabase;
+
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/ws");
             this.notificationHandler = notificationHandler;
@@ -39,6 +44,7 @@ public class WebSocketFacade extends Endpoint {
 
                     if (messageType == ServerMessage.ServerMessageType.LOAD_GAME) {
                         LoadGameMessage loadGameMessage = serializer.fromJson(message, LoadGameMessage.class);
+                        gameDatabase.updateCurrentGame(loadGameMessage.getGame());
                         printBoard(loadGameMessage.getGame(), loadGameMessage.getColor());
                     } else if (messageType == ServerMessage.ServerMessageType.ERROR) {
                         ErrorMessage errorMessage = serializer.fromJson(message, ErrorMessage.class);

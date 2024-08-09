@@ -151,13 +151,6 @@ public class Server {
         request = new JoinRequest(authToken, request.gameID(), request.playerColor());
 
         try {
-
-            //TODO--the tests don't pass with this, but it is needed for observers
-//            if (request.playerColor() == null) {
-//                GameData gameData = gameService.getGame(request.gameID());
-//                return serializer.toJson(gameData);
-//            }
-
             GameData gameData = gameService.joinGame(request);
             resultJson = serializer.toJson(gameData);
 
