@@ -164,9 +164,11 @@ public class ChessGame {
         ChessPiece piece = board.getPiece(move.getStartPosition());
         if (piece == null) {
             throw new InvalidMoveException("No piece selected.");
-        } else if (getTeamTurn() != piece.getTeamColor()) {
+        }
+        else if (getTeamTurn() != piece.getTeamColor()) {
             throw new InvalidMoveException("It is the other team's turn.");
-        } else if (!moves.contains(move)) {
+        }
+        else if (!moves.contains(move)) {
             throw new InvalidMoveException("Invalid move.");
         }
 

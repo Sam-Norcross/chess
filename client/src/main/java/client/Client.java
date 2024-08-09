@@ -78,7 +78,8 @@ public class Client {
                 return helpString();
             }
         } catch (Exception ex) {
-            return ex.getMessage();
+            notificationHandler.handleError(new ErrorMessage(ex.getMessage()));
+            return "";//ex.getMessage();
         }
     }
 
@@ -235,12 +236,18 @@ public class Client {
             //Update to most current game for later display purposes
             updateCurrentGame();
 
-            ws.makeMove(authToken, currentGame.gameID(), move);
-
-            currentGame.game().makeMove(move);
+            if (!currentGame.game().isGameOver(ChessGame.TeamColor.WHITE) &&
+                    !currentGame.game().isGameOver(ChessGame.TeamColor.BLACK)) {
+                ws.makeMove(authToken, currentGame.gameID(), move);
+                currentGame.game().makeMove(move);
+            } else {
+                throw new Exception("Error: the game is over");
+            }
 
         } catch (ArrayIndexOutOfBoundsException | StringIndexOutOfBoundsException e) {
             notificationHandler.handleError(new ErrorMessage("Error: both chess positions must be valid"));
+        } catch (Exception e) {
+            notificationHandler.handleError(new ErrorMessage(e.getMessage()));
         }
 
         return "";
@@ -260,12 +267,26 @@ public class Client {
     private String show(String[] tokens) throws Exception {
         try {
             updateCurrentGame();
-            ChessPosition position = stringToPosition(tokens[1]);
-            return showMoves(currentGame, playerColor, currentGame.game().validMoves(position));
+
+
+            if (!currentGame.game().isGameOver(ChessGame.TeamColor.WHITE) &&
+                    !currentGame.game().isGameOver(ChessGame.TeamColor.BLACK)) {
+                ChessPosition position = stringToPosition(tokens[1]);
+
+                if (currentGame.game().getBoard().getPiece(position) == null) {
+                    throw new Exception("Error: no piece selected");
+                }
+
+                return showMoves(currentGame, playerColor, currentGame.game().validMoves(position));
+            } else {
+                throw new Exception("Error: the game is over");
+            }
         } catch (ArrayIndexOutOfBoundsException | StringIndexOutOfBoundsException e) {
             notificationHandler.handleError(new ErrorMessage("Error: must include a valid chess position"));
+        } catch (Exception e) {
+            notificationHandler.handleError(new ErrorMessage(e.getMessage()));
         }
-        return null;
+        return "";
     }
 
     private void removeGameData() {

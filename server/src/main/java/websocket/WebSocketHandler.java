@@ -144,34 +144,36 @@ public class WebSocketHandler {
                 connections.broadcast(gameID, new NotificationMessage(NotificationMessage.NotificationType.MADE_MOVE, message),
                         authToken);
 
-
-                System.out.println("AAA");
-                System.out.println(updatedGameData.game().isInCheck(pieceColor));
-                System.out.println(updatedGameData.game().isInCheck(ChessGame.TeamColor.WHITE));
-                System.out.println(updatedGameData.game().isInCheck(ChessGame.TeamColor.BLACK));
-
                 checkEndConditions(updatedGameData.whiteUsername(), ChessGame.TeamColor.WHITE, updatedGameData);
                 checkEndConditions(updatedGameData.blackUsername(), ChessGame.TeamColor.BLACK, updatedGameData);
 
-//                if (updatedGameData.game().isInCheck(pieceColor)) {
-//                    connections.sendToAll(gameID, new NotificationMessage(NotificationMessage.NotificationType.CHECK,
-//                            username + " is in check"));
-//                } else if (updatedGameData.game().isInCheckmate(pieceColor)) {
-//                    connections.sendToAll(gameID, new NotificationMessage(NotificationMessage.NotificationType.CHECKMATE,
-//                            username + " is in checkmate. " + username + " wins!"));
-//                } else if (updatedGameData.game().isInStalemate(pieceColor)) {
-//                    connections.sendToAll(gameID, new NotificationMessage(NotificationMessage.NotificationType.CHECK,
-//                            username + " is in stalemate. " + updatedGameData.gameName() + "ends in a tie!"));
-//                }
             }
         }
     }
 
     private void checkEndConditions(String username, ChessGame.TeamColor color, GameData gameData) throws Exception {
         int gameID = gameData.gameID();
+
+        if (username == null) {
+            username = color.name();
+        }
+
+        String otherPlayerUsername = null;
+        if (gameData.whiteUsername() != null && gameData.whiteUsername().equals(username)) {
+            otherPlayerUsername = gameData.blackUsername();
+        } else if (gameData.blackUsername() != null && gameData.blackUsername().equals(username)) {
+            otherPlayerUsername = gameData.whiteUsername();
+        }
+        if (otherPlayerUsername == null) {
+            otherPlayerUsername = "White";
+            if (color == ChessGame.TeamColor.WHITE) {
+                otherPlayerUsername ="Black";
+            }
+        }
+
         if (gameData.game().isInCheckmate(color)) {
             connections.sendToAll(gameID, new NotificationMessage(NotificationMessage.NotificationType.CHECKMATE,
-                    username + " is in checkmate. " + username + " wins!"));
+                    username + " is in checkmate. " + otherPlayerUsername + " wins!"));
         } else if (gameData.game().isInCheck(color)) {
             connections.sendToAll(gameID, new NotificationMessage(NotificationMessage.NotificationType.CHECK,
                     username + " is in check"));

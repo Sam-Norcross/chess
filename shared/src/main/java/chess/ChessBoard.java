@@ -75,14 +75,6 @@ public class ChessBoard {
         squares[7][5] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP);
         squares[7][3] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN);
         squares[7][4] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING);
-
-
-
-        //TODO--testing ONLY
-        resetBoardTEST();
-
-
-
     }
 
     public void movePiece(ChessPosition startPosition, ChessPosition endPosition) {
@@ -155,15 +147,5 @@ public class ChessBoard {
         result += "   1 2 3 4 5 6 7 8\n";
         return result;
     }
-
-
-    public void resetBoardTEST() {
-        squares = new ChessPiece[8][8];
-        squares[0][0] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING);
-        squares[0][1] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
-        squares[1][2] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
-        squares[7][0] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING);
-    }
-
 
 }
